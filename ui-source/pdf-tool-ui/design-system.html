@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>纸间 PDF · 设计规范</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23D9482C'/%3E%3Cpath d='M14 5H9a1.4 1.4 0 0 0-1.4 1.4v11.2A1.4 1.4 0 0 0 9 19h6a1.4 1.4 0 0 0 1.4-1.4V7.4z' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cpath d='M13.8 5v2.6h2.6' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  body { overflow: auto; background: var(--cream); }
+  .doc { max-width: 1080px; margin: 0 auto; padding: 40px 32px 96px; }
+  .doc-top {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding-bottom: 24px; border-bottom: 1px solid var(--line); margin-bottom: 36px;
+  }
+  .doc-top .spacer { flex: 1 1 auto; }
+  .doc-hero h1 { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+  .doc-hero p { font-size: 14px; color: var(--ink-2); margin-top: 8px; max-width: 62ch; line-height: 1.7; }
+  .doc-hero { margin-bottom: 40px; }
+  .kicker {
+    font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--brand-text);
+    text-transform: uppercase; display: block; margin-bottom: 10px;
+  }
+  h2.sec {
+    font-size: 20px; font-weight: 800; letter-spacing: -.01em;
+    margin: 56px 0 6px; display: flex; align-items: baseline; gap: 10px;
+  }
+  h2.sec .no {
+    font-size: 11px; font-weight: 700; color: var(--ink-4); letter-spacing: .1em;
+    font-family: var(--font-mono);
+  }
+  .sec-desc { font-size: 13px; color: var(--ink-3); line-height: 1.7; margin-bottom: 18px; max-width: 70ch; }
+  h3.sub { font-size: 13px; font-weight: 700; margin: 26px 0 10px; color: var(--ink-2); letter-spacing: .02em; }
+
+  .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  .sw { border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: #fff; }
+  .sw-color { height: 62px; display: grid; place-items: center; }
+  .sw-aa { font-size: 10px; font-weight: 800; letter-spacing: .06em; }
+  .sw-meta { padding: 9px 11px; }
+  .sw-name { font-size: 12px; font-weight: 700; }
+  .sw-hex { font-size: 11px; color: var(--ink-3); font-family: var(--font-mono); }
+  .sw-cr { font-size: 10.5px; color: var(--ink-3); margin-top: 3px; }
+
+  table.spec { width: 100%; border-collapse: collapse; font-size: 12.5px; background: #fff; border-radius: var(--r-md); overflow: hidden; box-shadow: var(--sh-1); }
+  table.spec th, table.spec td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  table.spec th { font-size: 11px; font-weight: 700; color: var(--ink-3); letter-spacing: .05em; background: var(--surface-2); text-transform: uppercase; }
+  table.spec tr:last-child td { border-bottom: none; }
+  table.spec .ok { color: var(--sage); font-weight: 700; font-size: 11px; }
+  table.spec .no { color: var(--danger); font-weight: 700; font-size: 11px; }
+  .mono { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-2); }
+
+  .type-row { display: flex; align-items: baseline; gap: 18px; padding: 11px 0; border-bottom: 1px dashed var(--line); }
+  .type-row .demo-el { flex: 1 1 auto; color: var(--ink); }
+  .type-row .type-meta { width: 168px; flex: none; font-size: 11px; color: var(--ink-3); font-family: var(--font-mono); }
+
+  .panel-demo { background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; box-shadow: var(--sh-1); }
+  .row-demo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .grid-demo { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .mini-label { font-size: 10.5px; font-weight: 700; color: var(--ink-4); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 8px; }
+
+  .space-demo { display: flex; align-items: flex-end; gap: 6px; }
+  .space-demo div { background: var(--brand-soft); border: 1px solid #F3CEC4; border-radius: 2px; }
+  .space-demo span { font-size: 9.5px; color: var(--ink-3); display: block; text-align: center; margin-top: 4px; font-family: var(--font-mono); }
+
+  .layout-map { display: grid; grid-template-columns: 64px 1fr; gap: 8px; font-size: 11.5px; }
+  .layout-map .lm-box { border: 1px dashed var(--line-3); border-radius: 6px; padding: 6px 9px; color: var(--ink-2); background: var(--surface-2); }
+  .note-block {
+    border-left: 2px solid var(--brand); background: var(--brand-softer);
+    padding: 12px 16px; border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    font-size: 12.5px; color: var(--ink-2); line-height: 1.7;
+  }
+  .note-block strong { color: var(--brand-text); }
+  footer.doc-foot { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 12px; }
+</style>
+</head>
+<body>
+
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <g id="i-arrow-left"><path d="M20 12H4.4M10.6 5.8 4.4 12l6.2 6.2"/></g>
+    <g id="i-check"><path d="m4.8 12.4 4.8 4.8L19.4 7.4"/></g>
+    <g id="i-lock"><rect x="4.6" y="10.4" width="14.8" height="10" rx="2.4"/><path d="M8.4 10.4V7.6a3.6 3.6 0 0 1 7.2 0v2.8"/></g>
+    <g id="i-sparkle"><path d="M12 3.4l1.9 5.1 5.1 1.9-5.1 1.9-1.9 5.1-1.9-5.1L5 10.4l5.1-1.9z"/></g>
+    <g id="i-alert"><path d="M12 3.6 21.4 20H2.6z"/><path d="M12 9.6v4.2M12 16.9h.02"/></g>
+    <g id="i-info"><circle cx="12" cy="12" r="8.6"/><path d="M12 11.2v5M12 8.2h.02"/></g>
+  </defs>
+</svg>
+
+<div class="doc">
+
+  <div class="doc-top">
+    <span class="brand-mark" style="width:30px;height:30px" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 3H7.4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9.2a2 2 0 0 0 2-2V7.6z"/><path d="M13.8 3v4.8h4.8"/>
+      </svg>
+    </span>
+    <strong style="font-size:14px;letter-spacing:.02em">纸间 PDF</strong>
+    <span class="chip chip-neutral">设计规范 v1.0</span>
+    <span class="spacer"></span>
+    <a class="btn btn-secondary btn-sm" href="index.html" style="text-decoration:none">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow-left"/></svg>
+      返回原型
+    </a>
+  </div>
+
+  <div class="doc-hero">
+    <span class="kicker">Design System</span>
+    <h1>暖纸底 + 一枚 PDF 红</h1>
+    <p>面向长时间处理文档的桌面工具，视觉上要年轻、精致、不冷冰，但必须一眼被认成 PDF 工具。做法是：底色取纸张的暖白，强调色只用一个 PDF 语义红，其余分区用低饱和色块轻轻区分。所有数值都按 4px 基准与 WCAG AA 落地。</p>
+  </div>
+
+  <div class="grid-demo" style="margin-bottom:8px">
+    <div class="note-block"><strong>底色即产品语言。</strong>奶油白 #FBF6F1 让大面积白纸状卡片有边界，长时间看不会发灰。</div>
+    <div class="note-block"><strong>红色只代表 PDF 与主操作。</strong>不做装饰性用红，避免误读成错误。</div>
+    <div class="note-block"><strong>状态不靠颜色。</strong>每个状态都带图标与文字，色盲与灰度打印下同样可读。</div>
+  </div>
+
+  <!-- 1 色彩 -->
+  <h2 class="sec"><span class="no">01</span>色彩</h2>
+  <p class="sec-desc">主色只有一个，其余为语义色与分区提示色。所有“文字 / 底色”组合的对比度实测值列在下方，正文目标 ≥ 4.5:1。</p>
+
+  <h3 class="sub">品牌与中性</h3>
+  <div class="swatch-grid">
+    <div class="sw"><div class="sw-color" style="background:#D9482C;color:#fff"><span class="sw-aa">装饰 / 图标</span></div>
+      <div class="sw-meta"><div class="sw-name">PDF 红 brand</div><div class="sw-hex">#D9482C</div><div class="sw-cr">白字 4.27:1 — 不用于正文按钮</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#C93F26;color:#fff"><span class="sw-aa">AA 4.97</span></div>
+      <div class="sw-meta"><div class="sw-name">主按钮 bottom</div><div class="sw-hex">#C93F26</div><div class="sw-cr">白字 4.97:1 ✓</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#AF331C;color:#fff"><span class="sw-aa">AA 5.90</span></div>
+      <div class="sw-meta"><div class="sw-name">品牌文字</div><div class="sw-hex">#AF331C</div><div class="sw-cr">在奶油底 5.90:1 ✓</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#231D1A;color:#fff"><span class="sw-aa">AAA 15.5</span></div>
+      <div class="sw-meta"><div class="sw-name">正文 ink</div><div class="sw-hex">#231D1A</div><div class="sw-cr">在奶油底 15.49:1 ✓</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#574C45;color:#fff"><span class="sw-aa">AAA 7.74</span></div>
+      <div class="sw-meta"><div class="sw-name">次级文字 ink-2</div><div class="sw-hex">#574C45</div><div class="sw-cr">在奶油底 7.74:1 ✓</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#7C6E65;color:#fff"><span class="sw-aa">AA 4.91</span></div>
+      <div class="sw-meta"><div class="sw-name">辅助文字 ink-3</div><div class="sw-hex">#7C6E65</div><div class="sw-cr">在白底 4.91:1 ✓</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#FBF6F1;border-bottom:1px solid #EDE2D8"><span style="font-size:10px;color:#7C6E65">cream</span></div>
+      <div class="sw-meta"><div class="sw-name">页面底色</div><div class="sw-hex">#FBF6F1</div><div class="sw-cr">全局底色</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#F0E6DB"><span style="font-size:10px;color:#7C6E65">canvas</span></div>
+      <div class="sw-meta"><div class="sw-name">画布底</div><div class="sw-hex">#F0E6DB</div><div class="sw-cr">PDF 页面在其上浮起</div></div></div>
+  </div>
+
+  <h3 class="sub">语义色（文字 / 浅底）</h3>
+  <div class="swatch-grid">
+    <div class="sw"><div class="sw-color" style="background:#E8F1EA;color:#3E6B54"><span class="sw-aa">AA 5.30</span></div>
+      <div class="sw-meta"><div class="sw-name">本机 / 成功</div><div class="sw-hex">#3E6B54 / #E8F1EA</div><div class="sw-cr">仅本机状态卡</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#FFF6E8;color:#8C6A3F"><span class="sw-aa">AA 4.61</span></div>
+      <div class="sw-meta"><div class="sw-name">演示 / 警示</div><div class="sw-hex">#8C6A3F / #FFF6E8</div><div class="sw-cr">演示结果、未接入</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#FBE9E4;color:#AF331C"><span class="sw-aa">AA 5.36</span></div>
+      <div class="sw-meta"><div class="sw-name">破坏性</div><div class="sw-hex">#AF331C / #FBE9E4</div><div class="sw-cr">删除、脱敏</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#EFEAF7;color:#5E5188"><span class="sw-aa">AA 5.91</span></div>
+      <div class="sw-meta"><div class="sw-name">分区 · 紫</div><div class="sw-hex">#5E5188 / #EFEAF7</div><div class="sw-cr">页面整理 / 批注</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#E8F0F6;color:#4A6E8F"><span class="sw-aa">AA 4.65</span></div>
+      <div class="sw-meta"><div class="sw-name">分区 · 蓝</div><div class="sw-hex">#4A6E8F / #E8F0F6</div><div class="sw-cr">合并 / 转换 / 对比</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#FBEADF;color:#8F4A28"><span class="sw-aa">AA 5.64</span></div>
+      <div class="sw-meta"><div class="sw-name">分区 · 桃</div><div class="sw-hex">#8F4A28 / #FBEADF</div><div class="sw-cr">拆分 / 编辑</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#E6F1ED;color:#3F6659"><span class="sw-aa">AA 5.58</span></div>
+      <div class="sw-meta"><div class="sw-name">分区 · 青</div><div class="sw-hex">#3F6659 / #E6F1ED</div><div class="sw-cr">压缩</div></div></div>
+    <div class="sw"><div class="sw-color" style="background:#F5EDDF;color:#74571F"><span class="sw-aa">AA 5.78</span></div>
+      <div class="sw-meta"><div class="sw-name">分区 · 沙</div><div class="sw-hex">#74571F / #F5EDDF</div><div class="sw-cr">表单</div></div></div>
+  </div>
+
+  <h3 class="sub">对比度实测表</h3>
+  <table class="spec">
+    <thead><tr><th>前景 / 背景</th><th>用途</th><th>比值</th><th>AA 正文</th><th>AA 大字号</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">#231D1A / #FBF6F1</td><td>正文</td><td class="mono">15.49:1</td><td class="ok">通过</td><td class="ok">通过</td></tr>
+      <tr><td class="mono">#574C45 / #FBF6F1</td><td>次级正文</td><td class="mono">7.74:1</td><td class="ok">通过</td><td class="ok">通过</td></tr>
+      <tr><td class="mono">#7C6E65 / #FFFFFF</td><td>说明文字</td><td class="mono">4.91:1</td><td class="ok">通过</td><td class="ok">通过</td></tr>
+      <tr><td class="mono">#FFFFFF / #C93F26</td><td>主按钮</td><td class="mono">4.97:1</td><td class="ok">通过</td><td class="ok">通过</td></tr>
+      <tr><td class="mono">#FFFFFF / #D9482C</td><td>装饰性色块</td><td class="mono">4.27:1</td><td class="no">不用于正文</td><td class="ok">通过</td></tr>
+      <tr><td class="mono">#AF331C / #FBE9E4</td><td>破坏性提示</td><td class="mono">5.36:1</td><td class="ok">通过</td><td class="ok">通过</td></tr>
+      <tr><td class="mono">#8C6A3F / #FFF6E8</td><td>演示标记</td><td class="mono">4.61:1</td><td class="ok">通过</td><td class="ok">通过</td></tr>
+      <tr><td class="mono">#A2938A / #FFFFFF</td><td>占位符 / 禁用</td><td class="mono">2.62:1</td><td class="no">不承载信息</td><td class="no">仅装饰</td></tr>
+    </tbody>
+  </table>
+  <p class="sec-desc" style="margin-top:10px">说明：<span class="mono">#D9482C</span> 只做图标、描边与装饰；需要白字承载信息时一律使用 <span class="mono">#C93F26</span>。任何状态都不允许只靠颜色区分——见第 08 节。</p>
+
+  <!-- 2 字阶 -->
+  <h2 class="sec"><span class="no">02</span>字体与字阶</h2>
+  <p class="sec-desc">系统字体栈优先，避免安装依赖。<span class="mono">PingFang SC → HarmonyOS Sans → MiSans → Microsoft YaHei UI</span>，数字统一 tabular-nums，保证页码与文件大小不跳动。</p>
+  <table class="spec">
+    <thead><tr><th>用途</th><th>字号 / 行高</th><th>字重</th><th>样例</th></tr></thead>
+    <tbody>
+      <tr><td>页面标题</td><td class="mono">24 / 1.28</td><td>800</td><td><span style="font-size:24px;font-weight:800;letter-spacing:-.02em">把 PDF 拖进来</span></td></tr>
+      <tr><td>模块标题</td><td class="mono">17 / 1.3</td><td>700</td><td><span style="font-size:17px;font-weight:700">最近文件</span></td></tr>
+      <tr><td>面板标题</td><td class="mono">15 / 1.4</td><td>700</td><td><span style="font-size:15px;font-weight:700">合并 PDF</span></td></tr>
+      <tr><td>正文 / 控件</td><td class="mono">14 / 1.62</td><td>400–600</td><td><span style="font-size:14px">打开过的 PDF 会出现在这里。</span></td></tr>
+      <tr><td>次级正文</td><td class="mono">13 / 1.6</td><td>400</td><td><span style="font-size:13px;color:var(--ink-2)">结果会另存为新文件，原文件不变。</span></td></tr>
+      <tr><td>说明 / 元信息</td><td class="mono">12 / 1.55</td><td>400</td><td><span style="font-size:12px;color:var(--ink-3)">12 页 · 3.8 MB · 今天 11:20</span></td></tr>
+      <tr><td>标签 / 胶囊</td><td class="mono">11 / 1.4</td><td>600–700</td><td><span style="font-size:11px;font-weight:700;letter-spacing:.08em">ONLY LOCAL</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- 3 间距与栅格 -->
+  <h2 class="sec"><span class="no">03</span>间距、圆角与栅格</h2>
+  <p class="sec-desc">4px 基准。卡片内边距固定 14px，列表行高 40px，面板左右内边距 16px，三栏宽度固定，窗口变化时优先折叠而不是挤压。</p>
+
+  <div class="space-demo" style="margin-bottom:18px">
+    <div style="width:4px;height:4px"></div><div style="width:8px;height:8px"></div><div style="width:12px;height:12px"></div>
+    <div style="width:16px;height:16px"></div><div style="width:20px;height:20px"></div><div style="width:24px;height:24px"></div>
+    <div style="width:32px;height:32px"></div><div style="width:40px;height:40px"></div><div style="width:56px;height:56px"></div>
+  </div>
+  <p class="sec-desc mono" style="margin-bottom:20px">4 · 8 · 12 · 14 · 16 · 20 · 24 · 32 · 40 · 56</p>
+
+  <div class="grid-demo">
+    <div class="panel-demo">
+      <div class="mini-label">布局尺寸</div>
+      <div class="layout-map">
+        <span class="mono">244</span><span class="lm-box">侧栏（≤860px 收为 64 图标栏）</span>
+        <span class="mono">62</span><span class="lm-box">顶栏</span>
+        <span class="mono">198</span><span class="lm-box">缩略图栏（合并/对比时隐藏）</span>
+        <span class="mono">348</span><span class="lm-box">设置面板（≤1080px 变抽屉）</span>
+        <span class="mono">30</span><span class="lm-box">状态栏</span>
+      </div>
+    </div>
+    <div class="panel-demo">
+      <div class="mini-label">圆角阶梯</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="width:44px;height:44px;background:var(--cream-2);border:1px solid var(--line-2);border-radius:6px"></div>
+        <div style="width:44px;height:44px;background:var(--cream-2);border:1px solid var(--line-2);border-radius:9px"></div>
+        <div style="width:44px;height:44px;background:var(--cream-2);border:1px solid var(--line-2);border-radius:12px"></div>
+        <div style="width:44px;height:44px;background:var(--cream-2);border:1px solid var(--line-2);border-radius:16px"></div>
+        <div style="width:44px;height:44px;background:var(--cream-2);border:1px solid var(--line-2);border-radius:20px"></div>
+        <div style="height:32px;padding:0 12px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-text);font-size:11px;font-weight:700;border-radius:999px">pill</div>
+      </div>
+      <p class="sec-desc" style="margin:10px 0 0">6 小控件 · 9 按钮输入 · 12 行 · 16 卡片 · 20 区块 · 999 胶囊</p>
+    </div>
+  </div>
+
+  <h3 class="sub">阴影</h3>
+  <div class="grid-demo">
+    <div style="background:#fff;border-radius:14px;height:70px;display:grid;place-items:center;box-shadow:var(--sh-1);font-size:11px;color:var(--ink-3)">sh-1 卡片默认</div>
+    <div style="background:#fff;border-radius:14px;height:70px;display:grid;place-items:center;box-shadow:var(--sh-2);font-size:11px;color:var(--ink-3)">sh-2 悬浮 / 拖放激活</div>
+    <div style="background:#fff;border-radius:14px;height:70px;display:grid;place-items:center;box-shadow:var(--sh-3);font-size:11px;color:var(--ink-3)">sh-3 对话框 / 浮层</div>
+    <div style="background:#fff;border-radius:3px;height:70px;display:grid;place-items:center;box-shadow:var(--sh-paper);font-size:11px;color:var(--ink-3)">sh-paper PDF 页面</div>
+  </div>
+
+  <!-- 4 组件 -->
+  <h2 class="sec"><span class="no">04</span>按钮与控件</h2>
+  <p class="sec-desc">主操作永远在右栏底部同一位置；破坏性操作使用 danger 或 outline-danger，并且必须经过确认步骤。</p>
+
+  <div class="panel-demo">
+    <div class="grid-demo">
+      <div>
+        <div class="mini-label">按钮 / 默认与悬停</div>
+        <div class="row-demo">
+          <button class="btn btn-primary">打开 PDF</button>
+          <button class="btn btn-secondary">取消</button>
+          <button class="btn btn-quiet">次要强调</button>
+          <button class="btn btn-ghost">文字按钮</button>
+        </div>
+      </div>
+      <div>
+        <div class="mini-label">状态</div>
+        <div class="row-demo">
+          <button class="btn btn-primary" disabled>已禁用</button>
+          <button class="btn btn-outline-danger">删除页面</button>
+          <button class="btn btn-danger">确认脱敏</button>
+        </div>
+      </div>
+    </div>
+    <div style="height:1px;background:var(--line);margin:18px 0"></div>
+    <div class="grid-demo">
+      <div>
+        <div class="mini-label">输入与选择</div>
+        <input class="input" placeholder="页码范围，例如 1-3, 5" style="margin-bottom:8px">
+        <div class="segmented" style="margin-bottom:8px">
+          <button aria-pressed="true">按页码</button>
+          <button aria-pressed="false">每 N 页</button>
+          <button aria-pressed="false">选中的页</button>
+        </div>
+        <label class="check-row"><input type="checkbox" checked> 合并后保留原书签</label>
+      </div>
+      <div>
+        <div class="mini-label">选项卡片</div>
+        <div class="opt-list">
+          <label class="opt"><input type="radio" name="s1" checked><div class="opt-main"><div class="opt-title">标准压缩</div><div class="opt-desc">降低图像采样，文字保持清晰</div></div></label>
+          <label class="opt"><input type="radio" name="s1" disabled><div class="opt-main"><div class="opt-title">极限压缩 <span class="chip chip-off" style="height:18px;font-size:10px">未接入</span></div><div class="opt-desc">当前引擎不支持，也不会改走云端</div></div></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">胶囊与状态块</h3>
+  <div class="panel-demo">
+    <div class="row-demo" style="margin-bottom:16px">
+      <span class="chip chip-local"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lock"/></svg>仅本机处理</span>
+      <span class="chip chip-demo"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sparkle"/></svg>演示渲染</span>
+      <span class="chip chip-brand">推荐</span>
+      <span class="chip chip-off">未接入</span>
+      <span class="chip chip-neutral">已选 3 页</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="state-block is-demo">
+        <span class="sb-icon" style="color:#8C6A3F"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sparkle"/></svg></span>
+        <div><div class="sb-title">演示完成 <span class="chip chip-demo">未写入文件</span></div>
+        <div class="sb-desc">流程已走完，按设计会另存为 <strong>产品设计复盘_已整理.pdf</strong>。处理引擎尚未接入，本次没有生成任何文件。</div>
+        <div class="sb-extra">目标位置：C:\Users\lungm\Documents\纸间输出\…</div></div>
+      </div>
+      <div class="state-block is-error">
+        <span class="sb-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-alert"/></svg></span>
+        <div><div class="sb-title">输出目录不可写</div>
+        <div class="sb-desc">无法写入 D:\报销\ 目录，可能是权限不足或磁盘已满。请换一个输出目录后重试。</div></div>
+      </div>
+      <div class="state-block is-ok">
+        <span class="sb-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg></span>
+        <div><div class="sb-title">本机处理中，无网络连接</div>
+        <div class="sb-desc">状态用图标 + 文案表达，不依赖颜色。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">缩略图六种状态</h3>
+  <div class="panel-demo" style="background:var(--cream-2)">
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="width:104px"><div class="thumb" style="display:block;padding:4px"><div class="thumb-figure"><span class="thumb-badge">1</span></div></div><div class="mini-label" style="margin-top:6px">默认</div></div>
+      <div style="width:104px"><div class="thumb" style="display:block;padding:4px;background:rgba(255,255,255,.72)"><div class="thumb-figure"><span class="thumb-badge">2</span></div></div><div class="mini-label" style="margin-top:6px">悬停</div></div>
+      <div style="width:104px"><div class="thumb is-selected" style="display:block;padding:4px"><div class="thumb-figure"><span class="thumb-badge">3</span><span class="thumb-rot">90°</span></div></div><div class="mini-label" style="margin-top:6px">选中</div></div>
+      <div style="width:104px"><div class="thumb" style="display:block;padding:4px;opacity:.42"><div class="thumb-figure"><span class="thumb-badge">4</span></div></div><div class="mini-label" style="margin-top:6px">拖动中</div></div>
+      <div style="width:104px"><div class="thumb drop-before" style="display:block;padding:4px"><div class="thumb-figure"><span class="thumb-badge">5</span></div></div><div class="mini-label" style="margin-top:6px">拖放目标</div></div>
+      <div style="width:104px"><div class="thumb" style="display:block;padding:4px"><div class="thumb-figure is-blank"><span class="thumb-badge">6</span></div></div><div class="mini-label" style="margin-top:6px">空白页</div></div>
+    </div>
+  </div>
+
+  <h3 class="sub">进度与对话框</h3>
+  <div class="grid-demo">
+    <div class="panel-demo">
+      <div class="mini-label">处理中（可取消）</div>
+      <div class="progress-wrap">
+        <div class="progress-head"><span>正在拼接页面…</span><span class="pc">62%</span></div>
+        <div class="progress-track"><div class="progress-bar is-demo" style="width:62%"></div></div>
+        <div class="row-inline" style="margin-top:6px">
+          <p class="field-hint" style="flex:1">演示进度：引擎未接入</p>
+          <button class="btn btn-secondary btn-sm">取消</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel-demo">
+      <div class="mini-label">确认对话框（危险）</div>
+      <div style="background:var(--surface-sunk);border:1px solid var(--line);border-radius:12px;padding:14px">
+        <div class="row-inline" style="align-items:flex-start;gap:10px">
+          <span class="dialog-icon is-danger" style="width:28px;height:28px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-alert"/></svg></span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700">确认永久移除这些内容？</div>
+            <div style="font-size:11.5px;color:var(--ink-2);margin-top:4px;line-height:1.6">脱敏会从内容流删除标记区域，无法撤销。结果另存副本。</div>
+            <div class="dialog-extra is-danger" style="margin-top:8px"><ul><li>标记数量：2 处</li><li>原文件保留</li></ul></div>
+            <div class="row-demo" style="margin-top:10px;justify-content:flex-end">
+              <button class="btn btn-ghost btn-sm">取消</button>
+              <button class="btn btn-danger btn-sm">确认脱敏并另存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 状态 -->
+  <h2 class="sec"><span class="no">05</span>状态覆盖</h2>
+  <p class="sec-desc">每个工具至少覆盖 10 种状态。原型右上角的「演示状态」可以在任意面板之间切换，用来核对文案与层级。</p>
+  <table class="spec">
+    <thead><tr><th>状态</th><th>触发</th><th>表现</th><th>可用操作</th></tr></thead>
+    <tbody>
+      <tr><td>未选文件</td><td>进入工具但未打开 PDF</td><td>蓝色提示块 + 文件名占位</td><td>选择 PDF / 用演示文档</td></tr>
+      <tr><td>加载中</td><td>读取文件、生成缩略图</td><td>骨架屏 + 38% 进度条</td><td>等待（大文件提示）</td></tr>
+      <tr><td>可编辑</td><td>文件就绪</td><td>状态区清空，主按钮可用</td><td>全部参数</td></tr>
+      <tr><td>处理中</td><td>点击主按钮</td><td>斜纹进度条 + 阶段文案 + 取消</td><td>取消</td></tr>
+      <tr><td>完成</td><td>流程结束</td><td><strong>琥珀色“演示完成”</strong>，明确未写文件</td><td>再试一次（打开结果禁用并说明）</td></tr>
+      <tr><td>失败</td><td>目录不可写等</td><td>红色 + 原因 + 下一步建议</td><td>重试 / 换目录</td></tr>
+      <tr><td>取消</td><td>处理中取消</td><td>蓝色，说明文件未改动</td><td>重新开始</td></tr>
+      <tr><td>密码错误 / 需要密码</td><td>加密 PDF</td><td>红色 + 密码输入入口</td><td>输入密码（仅本机）</td></tr>
+      <tr><td>格式不支持</td><td>非 PDF / 损坏文件</td><td>蓝色说明 + 支持列表</td><td>换一个文件</td></tr>
+      <tr><td>功能未接入</td><td>引擎不具备的能力</td><td>明确说明，<strong>无云端兜底按钮</strong></td><td>查看可用工具</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 6 无障碍 -->
+  <h2 class="sec"><span class="no">06</span>无障碍与键盘</h2>
+  <p class="sec-desc">所有主要操作可键盘到达，焦点环统一 2px <span class="mono">#1F6FD0</span> + 2px 偏移；触控目标 ≥ 32px（主导航与主按钮 ≥ 36px）；支持 prefers-reduced-motion。</p>
+  <table class="spec">
+    <thead><tr><th>快捷键</th><th>动作</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">Ctrl + O</td><td>打开 PDF</td><td>与首页主按钮一致</td></tr>
+      <tr><td class="mono">Ctrl + Z / Ctrl + Shift + Z</td><td>撤销 / 重做</td><td>页面排序、旋转、复制、删除</td></tr>
+      <tr><td class="mono">Ctrl + S</td><td>另存副本</td><td>先确认，再演示</td></tr>
+      <tr><td class="mono">← → / PageUp PageDown</td><td>上一页 / 下一页</td><td>输入框聚焦时不拦截</td></tr>
+      <tr><td class="mono">+ / -</td><td>放大 / 缩小</td><td>40%–250%，点击百分比回到适应宽度</td></tr>
+      <tr><td class="mono">Esc</td><td>关闭对话框 / 浮层</td><td>不丢失已填内容</td></tr>
+      <tr><td class="mono">Enter</td><td>对话框确认</td><td>文本域内不触发</td></tr>
+    </tbody>
+  </table>
+  <div class="note-block" style="margin-top:16px">
+    <strong>图标按钮必须有文字替代。</strong>所有 <span class="mono">.icon-btn</span> 都带 <span class="mono">aria-label</span> 与 <span class="mono">data-tip</span> 悬浮说明；纯图形状态（如“仅本机”）同时提供文字，灰度打印下仍可读。
+  </div>
+
+  <!-- 7 隐私 -->
+  <h2 class="sec"><span class="no">07</span>“仅本机”如何被看见</h2>
+  <p class="sec-desc">这是产品最重要的承诺，因此在界面上出现四次，而不是一次提示就消失。</p>
+  <div class="grid-demo">
+    <div class="panel-demo"><div class="mini-label">1 · 侧栏常驻</div><div class="local-card" style="margin:0"><span class="dot"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lock"/></svg></span><div><div class="lc-title">仅本机处理</div><div class="lc-desc">文件不上传、不联网</div></div></div></div>
+    <div class="panel-demo"><div class="mini-label">2 · 顶栏胶囊</div><span class="chip chip-lg chip-local"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lock"/></svg>仅本机处理</span></div>
+    <div class="panel-demo"><div class="mini-label">3 · 状态栏</div><span style="font-size:11px;color:var(--ink-3);display:inline-flex;gap:6px;align-items:center"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-lock"/></svg>仅本机 · 未建立任何网络连接</span></div>
+    <div class="panel-demo"><div class="mini-label">4 · 设置页锁定</div><span class="chip chip-lg" style="background:#FFF;color:#2D5442;border-color:#CFE2D5">已锁定</span></div>
+  </div>
+
+  <footer class="doc-foot">
+    <span>纸间 PDF · 设计规范 v1.0</span>
+    <span>2026-11-16</span>
+    <span>基准尺寸 1280×800 起 · 简体中文</span>
+    <span>对比度数值由 WCAG 2.1 相对亮度公式计算</span>
+  </footer>
+</div>
+
+</body>
+</html>

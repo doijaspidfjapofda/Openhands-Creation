@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>纸间 PDF · 本机 PDF 工作台</title>
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23D9482C'/%3E%3Cpath d='M14 5H9a1.4 1.4 0 0 0-1.4 1.4v11.2A1.4 1.4 0 0 0 9 19h6a1.4 1.4 0 0 0 1.4-1.4V7.4z' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cpath d='M13.8 5v2.6h2.6' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<!-- ============================================================
+     图标集（内联 SVG，无外部依赖）
+     ============================================================ -->
+<svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <g id="i-home"><path d="M3.5 10.4 12 3.6l8.5 6.8V20a1 1 0 0 1-1 1h-4.7v-6.2H9.2V21H4.5a1 1 0 0 1-1-1z"/></g>
+    <g id="i-clock"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.4V12l3.2 2"/></g>
+    <g id="i-layers"><path d="m12 3.2 8.6 4.6-8.6 4.6L3.4 7.8z"/><path d="m3.4 12.4 8.6 4.6 8.6-4.6"/><path d="m3.4 16.8 8.6 4.6 8.6-4.6" opacity=".45"/></g>
+    <g id="i-merge"><path d="M8 4H4.6v3.6M16 4h3.4v3.6M8 20H4.6v-3.6M16 20h3.4v-3.6"/><path d="M12 8.6v10.2M8.8 15.6 12 18.8l3.2-3.2"/></g>
+    <g id="i-split"><path d="M11.4 3v18"/><path d="M11.4 8.4H6.6a2 2 0 0 0-2 2v2.2M11.4 8.4h4.8a2 2 0 0 1 2 2v2.2"/><path d="m7.4 15.4 2 2-2 2M15.4 15.4l2 2-2 2"/></g>
+    <g id="i-compress"><path d="M9.2 3.4v4.2H5M14.8 3.4v4.2H19M9.2 20.6v-4.2H5M14.8 20.6v-4.2H19"/><rect x="8.6" y="9.4" width="6.8" height="5.2" rx="1.2"/></g>
+    <g id="i-convert"><path d="M3.6 8.6h14.2l-3.2-3.2M20.4 15.4H6.2l3.2 3.2"/></g>
+    <g id="i-edit"><path d="M12.6 20.4H21"/><path d="M16.4 3.8a2.2 2.2 0 0 1 3.1 3.1L7.6 18.8l-4.2 1.2 1.2-4.2z"/></g>
+    <g id="i-comment"><path d="M20.6 11.8a8.2 8.2 0 0 1-8.2 8.2H8.2L3.8 22.6v-5.1a8.2 8.2 0 1 1 16.8-5.7z"/><path d="M8.6 9.4h6.8M8.6 13h4.4" opacity=".55"/></g>
+    <g id="i-shield"><path d="M12 3 20 6v5.4c0 5-3.4 8.2-8 9.8-4.6-1.6-8-4.8-8-9.8V6z"/><path d="M12 10.6v3.2" opacity=".6"/><circle cx="12" cy="9" r="1.5"/></g>
+    <g id="i-settings"><circle cx="12" cy="12" r="3.1"/><path d="M19.5 14.4a1.6 1.6 0 0 0 .3 1.8l.1.1a1.9 1.9 0 1 1-2.7 2.7l-.1-.1a1.6 1.6 0 0 0-2.7 1.1v.3a1.9 1.9 0 1 1-3.8 0v-.2a1.6 1.6 0 0 0-2.7-1.2l-.1.1a1.9 1.9 0 1 1-2.7-2.7l.1-.1a1.6 1.6 0 0 0-1.1-2.7H3.6a1.9 1.9 0 1 1 0-3.8h.2a1.6 1.6 0 0 0 1.2-2.7l-.1-.1a1.9 1.9 0 1 1 2.7-2.7l.1.1a1.6 1.6 0 0 0 2.7-1.1V3.6a1.9 1.9 0 1 1 3.8 0v.2a1.6 1.6 0 0 0 2.7 1.2l.1-.1a1.9 1.9 0 1 1 2.7 2.7l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.3a1.9 1.9 0 1 1 0 3.8h-.2a1.6 1.6 0 0 0-1.5.9z"/></g>
+    <g id="i-file"><path d="M14 3H7.4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9.2a2 2 0 0 0 2-2V7.6z"/><path d="M13.8 3v4.8h4.8"/></g>
+    <g id="i-file-pdf"><path d="M14 3H7.4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9.2a2 2 0 0 0 2-2V7.6z"/><path d="M13.8 3v4.8h4.8"/><path d="M8.6 16.6c1.6-1 2.4-3 2.4-4.8M10.4 17c1.4 0 3.2-1 3.8-2.2M13 14.4c.6-1.2.4-3-.4-3.2-.6-.2-1 .6-.6 1.6.5 1.2 2 2.2 3.4 2.4" opacity=".5"/></g>
+    <g id="i-folder"><path d="M3.4 7.4a2 2 0 0 1 2-2h3.6l2 2.2h7.6a2 2 0 0 1 2 2v8.6a2 2 0 0 1-2 2H5.4a2 2 0 0 1-2-2z"/></g>
+    <g id="i-plus"><path d="M12 5.2v13.6M5.2 12h13.6"/></g>
+    <g id="i-minus"><path d="M5.2 12h13.6"/></g>
+    <g id="i-rotate"><path d="M20.4 12a8.4 8.4 0 1 1-2.8-6.3"/><path d="M20.8 3.4v5.2h-5.2"/></g>
+    <g id="i-rotate-l"><path d="M3.6 12a8.4 8.4 0 1 0 2.8-6.3"/><path d="M3.2 3.4v5.2h5.2"/></g>
+    <g id="i-trash"><path d="M4 6.8h16M9.4 6.8V4.6a1 1 0 0 1 1-1h3.2a1 1 0 0 1 1 1v2.2"/><path d="M6.4 6.8 7.4 19.4a1.6 1.6 0 0 0 1.6 1.5h6a1.6 1.6 0 0 0 1.6-1.5l1-12.6"/><path d="M10.4 10.6v6M13.6 10.6v6" opacity=".5"/></g>
+    <g id="i-copy"><rect x="8.8" y="8.8" width="10.6" height="10.6" rx="1.8"/><path d="M15.4 5.6V4.8a1.8 1.8 0 0 0-1.8-1.8H5.4a1.8 1.8 0 0 0-1.8 1.8v8.2a1.8 1.8 0 0 0 1.8 1.8h.8"/></g>
+    <g id="i-check"><path d="m4.8 12.4 4.8 4.8L19.4 7.4"/></g>
+    <g id="i-x"><path d="M6 6l12 12M18 6 6 18"/></g>
+    <g id="i-chevron-down"><path d="m6.4 9.4 5.6 5.6 5.6-5.6"/></g>
+    <g id="i-chevron-up"><path d="m6.4 14.6 5.6-5.6 5.6 5.6"/></g>
+    <g id="i-chevron-left"><path d="M14.6 5.8 8.4 12l6.2 6.2"/></g>
+    <g id="i-chevron-right"><path d="M9.4 5.8 15.6 12l-6.2 6.2"/></g>
+    <g id="i-arrow-left"><path d="M20 12H4.4M10.6 5.8 4.4 12l6.2 6.2"/></g>
+    <g id="i-arrow-right"><path d="M4 12h15.6M13.4 5.8 19.6 12l-6.2 6.2"/></g>
+    <g id="i-lock"><rect x="4.6" y="10.4" width="14.8" height="10" rx="2.4"/><path d="M8.4 10.4V7.6a3.6 3.6 0 0 1 7.2 0v2.8"/><path d="M12 14.4v2.2"/></g>
+    <g id="i-unlock"><rect x="4.6" y="10.4" width="14.8" height="10" rx="2.4"/><path d="M8.4 10.4V7.6a3.6 3.6 0 0 1 6.9-1.3"/></g>
+    <g id="i-offline"><path d="M3.4 3.4l17.2 17.2"/><path d="M8.6 15.4a3 3 0 0 0 3.4.5M4.4 10.8a10 10 0 0 1 3-1.7M19.6 10.8a10.4 10.4 0 0 0-4.6-2M7 6.6a13.6 13.6 0 0 1 10 1.3M15.4 18.6a3 3 0 0 1-4.6-1.9"/></g>
+    <g id="i-wifi"><path d="M2.6 8.8a15 15 0 0 1 18.8 0"/><path d="M6 12.4a10.4 10.4 0 0 1 12 0"/><path d="M9.4 15.8a5.6 5.6 0 0 1 5.2 0"/><circle cx="12" cy="19" r=".9" fill="currentColor" stroke="none"/></g>
+    <g id="i-alert-triangle"><path d="M12 3.6 21.4 20H2.6z"/><path d="M12 9.6v4.2M12 16.9h.02"/></g>
+    <g id="i-alert-circle"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.8v4.6M12 15.8h.02"/></g>
+    <g id="i-check-circle"><circle cx="12" cy="12" r="8.6"/><path d="m8.2 12.2 2.6 2.6 5-5.2"/></g>
+    <g id="i-info"><circle cx="12" cy="12" r="8.6"/><path d="M12 11.2v5M12 8.2h.02"/></g>
+    <g id="i-grip"><circle cx="9" cy="6.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="6.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="17.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="17.4" r="1.1" fill="currentColor" stroke="none"/></g>
+    <g id="i-undo"><path d="M8.6 6.4 4 11l4.6 4.6"/><path d="M4 11h9.6a5.8 5.8 0 0 1 0 11.6H9"/></g>
+    <g id="i-redo"><path d="M15.4 6.4 20 11l-4.6 4.6"/><path d="M20 11H10.4a5.8 5.8 0 0 0 0 11.6H15"/></g>
+    <g id="i-save"><path d="M5 3.6h10.6L19.6 7.6V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4.6a1 1 0 0 1 1-1z"/><path d="M8 3.6v5.2h6.6V3.6"/><rect x="8" y="13" width="8" height="8" rx=".8"/></g>
+    <g id="i-search"><circle cx="10.8" cy="10.8" r="6.6"/><path d="m16.4 16.4 4 4"/></g>
+    <g id="i-zoom-in"><circle cx="10.8" cy="10.8" r="6.6"/><path d="m16.4 16.4 4 4M10.8 8.2v5.2M8.2 10.8h5.2"/></g>
+    <g id="i-zoom-out"><circle cx="10.8" cy="10.8" r="6.6"/><path d="m16.4 16.4 4 4M8.2 10.8h5.2"/></g>
+    <g id="i-eye"><path d="M2.4 12S5.6 5.6 12 5.6 21.6 12 21.6 12S18.4 18.4 12 18.4 2.4 12 2.4 12z"/><circle cx="12" cy="12" r="3"/></g>
+    <g id="i-eye-off"><path d="M3.4 3.4l17.2 17.2"/><path d="M9.6 5.9A9.4 9.4 0 0 1 12 5.6c6.4 0 9.6 6.4 9.6 6.4a17 17 0 0 1-2.8 3.7M6.4 7.7A16.7 16.7 0 0 0 2.4 12S5.6 18.4 12 18.4a9.4 9.4 0 0 0 3.3-.6"/><path d="M10 10.1a2.9 2.9 0 0 0 4 4"/></g>
+    <g id="i-signature"><path d="M3 17.4c2.2-4.6 4-7.4 5.4-7.4s.6 4.4 2.2 4.4 2-3.6 3.4-3.6 1.4 2.6 2.6 3.4c1 .7 2.2.2 3-.6"/><path d="M3.4 21h17.2" opacity=".45"/></g>
+    <g id="i-form"><rect x="4" y="3.4" width="16" height="17.2" rx="2"/><path d="M7.6 8h8.8M7.6 12h8.8M7.6 16h4.4" opacity=".6"/></g>
+    <g id="i-compare"><rect x="3.4" y="4.4" width="7.2" height="15.2" rx="1.6"/><rect x="13.4" y="4.4" width="7.2" height="15.2" rx="1.6"/><path d="M5.8 8.4h2.4M5.8 12h2.4M15.8 8.4h2.4M15.8 12h2.4M15.8 15.6h2.4" opacity=".6"/></g>
+    <g id="i-highlight"><path d="M4.6 20.4h15"/><path d="m6 16.4 1.2-4.4 8.6-8.6a2 2 0 0 1 2.8 2.8l-8.6 8.6z"/></g>
+    <g id="i-underline"><path d="M6.4 4v6.4a5.6 5.6 0 0 0 11.2 0V4"/><path d="M4.6 20.4h14.8"/></g>
+    <g id="i-pen"><path d="M4.6 19.4c1-4.6 2.6-9.4 4.6-11.4 1.4-1.4 3.4-.6 3.2 1.2-.2 1.8-3.2 2.6-2 4.2 1 1.4 3.6-.6 4.4-1.8.8-1.2 2.2-1 2.2.6 0 1.6-1.4 3-1 4.2.4 1.2 2 1.2 3.2.4"/><path d="M4.4 21h15.2" opacity=".45"/></g>
+    <g id="i-shapes"><rect x="3.4" y="4" width="8" height="8" rx="1.4"/><circle cx="16.6" cy="15.4" r="4.4"/></g>
+    <g id="i-note"><path d="M4.6 4.6h10.8l4 4v10.8a1 1 0 0 1-1 1H4.6a1 1 0 0 1-1-1V5.6a1 1 0 0 1 1-1z"/><path d="M15 4.6V9h4.4"/><path d="M7.6 12.6h6M7.6 15.8h4" opacity=".6"/></g>
+    <g id="i-type"><path d="M4.6 6.6V4.4h14.8v2.2M12 4.4v15.2M9 19.6h6"/></g>
+    <g id="i-image"><rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2"/><circle cx="8.4" cy="9.6" r="1.6"/><path d="m3.8 17.4 5-4.8 3.4 3.2 3.2-2.8 4.6 4.4"/></g>
+    <g id="i-watermark"><path d="M3.4 15.4 15.4 3.4l4.2 4.2L7.6 19.6H3.4z" opacity=".55"/><path d="M8 8.4 15.4 15.8"/><path d="M12 20.6h8" opacity=".6"/></g>
+    <g id="i-stamp"><circle cx="12" cy="9" r="4.6"/><path d="M8.6 13.2 7 20.4h10l-1.6-7.2"/><path d="M6 20.6h12"/></g>
+    <g id="i-bookmark"><path d="M6.2 4.4a1 1 0 0 1 1-1h9.6a1 1 0 0 1 1 1v16.2l-5.8-3.8-5.8 3.8z"/></g>
+    <g id="i-key"><circle cx="8.4" cy="15.6" r="3.6"/><path d="m11 13 8-8M17.4 6.6l2 2M15.2 8.8l2 2"/></g>
+    <g id="i-list"><path d="M8.4 6.4h11.2M8.4 12h11.2M8.4 17.6h11.2"/><circle cx="4.2" cy="6.4" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.2" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.2" cy="17.6" r="1.2" fill="currentColor" stroke="none"/></g>
+    <g id="i-sparkle"><path d="M12 3.4l1.9 5.1 5.1 1.9-5.1 1.9-1.9 5.1-1.9-5.1L5 10.4l5.1-1.9z"/><path d="M18.6 16.4l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z" opacity=".6"/></g>
+    <g id="i-folder-open"><path d="M3.4 8.4V6.6a2 2 0 0 1 2-2h3.4l2 2.2h7.4a2 2 0 0 1 2 2v1.6"/><path d="M3.4 8.4h17.2l-1.8 10.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/></g>
+    <g id="i-external"><path d="M14 4.4h5.6V10"/><path d="M19.6 4.4 11 13"/><path d="M18.4 14.4v4.2a1.6 1.6 0 0 1-1.6 1.6H5.2a1.6 1.6 0 0 1-1.6-1.6V7a1.6 1.6 0 0 1 1.6-1.6h4.2"/></g>
+    <g id="i-slash"><circle cx="12" cy="12" r="8.6"/><path d="m6.2 6.2 11.6 11.6"/></g>
+    <g id="i-gauge"><path d="M4.4 17.6a8.6 8.6 0 1 1 15.2 0"/><path d="m12 12.4 3.6-3.2"/><circle cx="12" cy="13.6" r="1.4"/></g>
+    <g id="i-maximize"><path d="M9.4 4.4H4.4v5M14.6 4.4h5v5M9.4 19.6H4.4v-5M14.6 19.6h5v-5"/></g>
+    <g id="i-scan"><path d="M4.4 8.4V5.4a1 1 0 0 1 1-1h3M15.6 4.4h3a1 1 0 0 1 1 1v3M19.6 15.6v3a1 1 0 0 1-1 1h-3M8.4 19.6h-3a1 1 0 0 1-1-1v-3"/><path d="M4.4 12h15.2" opacity=".6"/></g>
+    <g id="i-download"><path d="M12 3.6v11.2M7.8 10.6 12 14.8l4.2-4.2"/><path d="M4.4 17.4v1.4a2 2 0 0 0 2 2h11.2a2 2 0 0 0 2-2v-1.4"/></g>
+    <g id="i-bolt"><path d="M13.4 2.6 5 13.4h5.6l-1 8 8.4-10.8H12.4z"/></g>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- ==========================================================
+       侧栏
+       ========================================================== -->
+  <aside class="sidebar">
+    <button class="brand" id="brandHome" aria-label="回到主页">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 3H7.4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9.2a2 2 0 0 0 2-2V7.6z"/>
+          <path d="M13.8 3v4.8h4.8"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">纸间</span>
+        <span class="brand-sub">PDF 工作台</span>
+      </span>
+    </button>
+
+    <div class="local-card">
+      <span class="dot">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lock"/></svg>
+      </span>
+      <div>
+        <div class="lc-title">仅本机处理</div>
+        <div class="lc-desc">文件不上传、不联网，处理过程只在这台电脑完成</div>
+      </div>
+    </div>
+
+    <nav class="nav scroll-y" id="nav" aria-label="主导航">
+      <div class="nav-group">浏览</div>
+      <button class="nav-item is-active" data-view="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg>
+        <span>主页</span>
+      </button>
+      <button class="nav-item" data-view="recent">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-clock"/></svg>
+        <span>最近文件</span>
+        <span class="nav-meta num" id="navRecentCount">3</span>
+      </button>
+
+      <div class="nav-group">本机工具</div>
+      <button class="nav-item" data-tool="organize">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-layers"/></svg>
+        <span>页面整理</span>
+      </button>
+      <button class="nav-item" data-tool="merge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-merge"/></svg>
+        <span>合并</span>
+      </button>
+      <button class="nav-item" data-tool="split">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-split"/></svg>
+        <span>拆分</span>
+      </button>
+      <button class="nav-item" data-tool="compress">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-compress"/></svg>
+        <span>压缩</span>
+      </button>
+      <button class="nav-item" data-tool="convert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-convert"/></svg>
+        <span>转换</span>
+      </button>
+      <button class="nav-item" data-tool="edit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-edit"/></svg>
+        <span>页面编辑</span>
+      </button>
+      <button class="nav-item" data-tool="annotate">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-comment"/></svg>
+        <span>批注与签名</span>
+      </button>
+      <button class="nav-item" data-tool="form">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-form"/></svg>
+        <span>表单填写</span>
+      </button>
+      <button class="nav-item" data-tool="compare">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-compare"/></svg>
+        <span>对比差异</span>
+      </button>
+      <button class="nav-item" data-tool="protect">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg>
+        <span>保护与脱敏</span>
+      </button>
+
+      <div class="nav-group">系统</div>
+      <button class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-settings"/></svg>
+        <span>设置</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="engine-row" title="处理引擎状态">
+        <span class="engine-dot" id="engineDot"></span>
+        <span>本机引擎：已就绪 · 合并 / 拆分 / 页面整理</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==========================================================
+       主区
+       ========================================================== -->
+  <div class="main">
+
+    <!-- ---------- 首页 ---------- -->
+    <section class="view" id="viewHome">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>主页</h1>
+          <p>选一个工具，或直接把文件拖进来</p>
+        </div>
+        <div class="topbar-spacer"></div>
+        <span class="chip chip-lg chip-local">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lock"/></svg>
+          仅本机处理
+        </span>
+        <button class="icon-btn" id="devToggle" data-tip="演示状态控制（评审用）" data-tip-pos="bottom" aria-label="演示状态控制">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-gauge"/></svg>
+        </button>
+        <button class="btn btn-primary" id="btnOpenHome">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-folder"/></svg>
+          打开 PDF
+        </button>
+        <div id="devPopHolder"></div>
+      </header>
+
+      <div class="view-scroll scroll-y" id="homeScroll">
+        <!-- 拖放区 -->
+        <div class="hero" id="dropzone" tabindex="0" role="button" aria-label="拖放 PDF 到此处，或按回车选择文件">
+          <div class="hero-copy">
+            <span class="hero-eyebrow">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-offline"/></svg>
+              LOCAL ONLY · 无需联网
+            </span>
+            <h2>把 PDF 拖进来，<em>就在本机</em>开始。</h2>
+            <p class="hero-sub">阅读、整理、合并、压缩、批注与保护，全部在这台电脑上完成，文件不会离开你的硬盘。</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary btn-lg" id="btnPick">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-file"/></svg>
+                选择 PDF 文件
+              </button>
+              <button class="btn btn-secondary btn-lg" id="btnDemoDoc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sparkle"/></svg>
+                用演示文档体验
+              </button>
+            </div>
+            <div class="hero-note">
+              <span>支持同时选择多个文件</span>
+              <span class="sep"></span>
+              <span>不上传</span>
+              <span class="sep"></span>
+              <span>不留云端副本</span>
+              <span class="sep"></span>
+              <span>结果另存为新文件</span>
+            </div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <svg viewBox="0 0 200 176" fill="none">
+              <g class="paper-float-2" opacity=".5">
+                <rect x="44" y="30" width="98" height="126" rx="8" fill="#FFF" stroke="#E9D9CB"/>
+              </g>
+              <g class="paper-float">
+                <rect x="52" y="20" width="106" height="132" rx="9" fill="#FFF" stroke="#E9D9CB"/>
+                <path d="M52 29a9 9 0 0 1 9-9h88a9 9 0 0 1 9 9v20H52z" fill="#FDF3F0"/>
+                <path d="M52 49h106" stroke="#F5E2DA"/>
+                <circle cx="64" cy="34" r="3.2" fill="#D9482C"/>
+                <rect x="73" y="31.6" width="36" height="4.8" rx="2.4" fill="#E9C8BC"/>
+                <rect x="64" y="62" width="82" height="5" rx="2.5" fill="#EDE2D8"/>
+                <rect x="64" y="73" width="66" height="5" rx="2.5" fill="#F0E7DF"/>
+                <rect x="64" y="88" width="82" height="4" rx="2" fill="#F2EAE3"/>
+                <rect x="64" y="97" width="74" height="4" rx="2" fill="#F2EAE3"/>
+                <rect x="64" y="106" width="58" height="4" rx="2" fill="#F2EAE3"/>
+                <rect x="64" y="120" width="46" height="16" rx="8" fill="#D9482C"/>
+                <text x="87" y="131.4" font-size="8.5" font-weight="700" fill="#fff" text-anchor="middle" font-family="system-ui, sans-serif" letter-spacing=".6">PDF</text>
+                <path d="M158 29 141 12" stroke="#E9D9CB" stroke-width="1"/>
+              </g>
+              <g stroke="#D9482C" stroke-width="1.6" stroke-linecap="round" opacity=".55">
+                <path d="M167 58v8M163 62h8"/>
+                <path d="M38 96v6M35 99h6"/>
+              </g>
+            </svg>
+            <span class="sticker">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lock"/></svg>
+              零上传
+            </span>
+          </div>
+        </div>
+
+        <!-- 最近文件 -->
+        <div class="section-head">
+          <h2>最近文件</h2>
+          <span class="count" id="recentCountText">最近打开过 3 个文件</span>
+          <div class="head-actions">
+            <button class="btn btn-ghost btn-sm" id="btnClearRecent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg>
+              清除记录
+            </button>
+          </div>
+        </div>
+        <div class="card" id="recentCard">
+          <div class="rec-list" id="recentList"></div>
+        </div>
+
+        <!-- 工具卡 -->
+        <div id="toolGroups"></div>
+
+        <p style="margin-top:26px;font-size:11.5px;color:var(--ink-3);line-height:1.7;max-width:62ch">
+          合并、拆分和页面整理已支持本机处理。其他工具会标明接入状态；文件不会上传到云端。
+        </p>
+      </div>
+    </section>
+
+    <!-- ---------- 最近文件 ---------- -->
+    <section class="view" id="viewRecent" hidden>
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>最近文件</h1>
+          <p>仅在当前运行期间记录文件名，不保存 PDF 内容或完整路径</p>
+        </div>
+        <div class="topbar-spacer"></div>
+        <span class="chip chip-lg chip-local">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lock"/></svg>
+          仅本机处理
+        </span>
+        <button class="btn btn-secondary" id="btnClearRecent2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg>
+          清除记录
+        </button>
+        <button class="btn btn-primary" id="btnOpenRecent">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-folder"/></svg>
+          打开 PDF
+        </button>
+      </header>
+      <div class="view-scroll scroll-y">
+        <div class="card" id="recentCardFull">
+          <div class="rec-list" id="recentListFull"></div>
+        </div>
+        <p style="margin-top:14px;font-size:11.5px;color:var(--ink-3);line-height:1.7">
+          文件内容不会被记录。清除列表只会移除本次运行期间的文件名记录。
+        </p>
+      </div>
+    </section>
+
+    <!-- ---------- PDF 工作区 ---------- -->
+    <section class="view" id="viewWorkspace" hidden>
+      <div class="workspace">
+        <header class="ws-topbar">
+          <button class="icon-btn" id="btnBack" data-tip="返回主页" aria-label="返回主页">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow-left"/></svg>
+          </button>
+
+          <div class="ws-file">
+            <span class="ws-file-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-file-pdf"/></svg>
+            </span>
+            <div style="min-width:0">
+              <div class="ws-file-name" id="wsFileName">产品设计复盘_2026.pdf</div>
+              <div class="ws-file-sub" id="wsFileSub">12 页 · 3.8 MB</div>
+            </div>
+          </div>
+
+          <div class="ws-chips">
+            <span class="chip chip-local">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lock"/></svg>
+              仅本机
+            </span>
+            <span class="chip chip-demo" id="wsDemoChip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sparkle"/></svg>
+              演示渲染
+            </span>
+          </div>
+
+          <div class="ws-divider"></div>
+
+          <button class="icon-btn" id="btnUndo" data-tip="撤销 Ctrl+Z" aria-label="撤销" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-undo"/></svg>
+          </button>
+          <button class="icon-btn" id="btnRedo" data-tip="重做 Ctrl+Shift+Z" aria-label="重做" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-redo"/></svg>
+          </button>
+
+          <div class="topbar-spacer"></div>
+
+          <div class="zoom-group">
+            <button class="icon-btn" id="zoomOut" data-tip="缩小 Ctrl+-" aria-label="缩小">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-minus"/></svg>
+            </button>
+            <button class="zoom-value" id="zoomVal" data-tip="恢复适应宽度" aria-label="当前缩放，点击恢复适应宽度">100%</button>
+            <button class="icon-btn" id="zoomIn" data-tip="放大 Ctrl++" aria-label="放大">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>
+            </button>
+          </div>
+
+          <div class="page-nav">
+            <button class="icon-btn" id="pagePrev" data-tip="上一页" aria-label="上一页" style="width:26px;height:26px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chevron-left"/></svg>
+            </button>
+            <input class="input num" id="pageInput" value="1" inputmode="numeric" aria-label="跳到页码">
+            <span class="page-nav-total">/ <span id="pageTotal">12</span></span>
+            <button class="icon-btn" id="pageNext" data-tip="下一页" aria-label="下一页" style="width:26px;height:26px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chevron-right"/></svg>
+            </button>
+          </div>
+
+          <div class="ws-divider"></div>
+
+          <button class="btn btn-secondary btn-sm" id="btnSaveCopy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-save"/></svg>
+            保存副本
+          </button>
+          <button class="icon-btn" id="btnCloseDoc" data-tip="关闭文档" aria-label="关闭文档">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-x"/></svg>
+          </button>
+        </header>
+
+        <div class="ws-body">
+          <!-- 左栏 -->
+          <aside class="rail" id="rail">
+            <div class="rail-head">
+              <span class="rail-title">页面 <span class="num" id="thumbCount">12</span></span>
+              <div class="spacer"></div>
+              <button class="icon-btn" id="btnSelectAll" data-tip="全选 / 取消全选" aria-label="全选或取消全选">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg>
+              </button>
+              <button class="icon-btn" id="btnAddBlank" data-tip="插入空白页" aria-label="插入空白页">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>
+              </button>
+            </div>
+            <div class="rail-body scroll-y" id="thumbList" role="listbox" aria-label="页面缩略图" aria-multiselectable="true"></div>
+            <div class="rail-foot">
+              <span>共 <strong id="footTotal">12</strong> 页</span>
+              <span>·</span>
+              <span>已选 <strong id="footSel">0</strong> 页</span>
+            </div>
+          </aside>
+
+          <!-- 中栏 -->
+          <main class="stage" id="stage">
+            <div class="stage-viewport scroll-y" id="stageViewport">
+              <div class="stage-canvas" id="stageCanvas" style="width:620px;height:877px">
+                <canvas id="docCanvas" width="1240" height="1754" style="width:620px;height:877px"></canvas>
+                <div class="stage-skeleton" id="stageSkeleton" hidden></div>
+                <div id="objLayer"></div>
+              </div>
+              <div class="stage-empty" id="stageEmpty" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-file"/></svg>
+                <div>
+                  <strong style="display:block;color:var(--ink-2);font-size:13px">还没有打开文件</strong>
+                  拖放 PDF 到这里，或从左上角选择文件
+                </div>
+                <button class="btn btn-primary btn-sm" id="btnPickInStage">选择 PDF</button>
+              </div>
+
+              <!-- 合并预览 -->
+              <div class="merge-preview" id="mergePreview" hidden></div>
+
+              <!-- 对比视图 -->
+              <div class="compare-grid" id="compareGrid" hidden></div>
+            </div>
+
+            <div class="canvas-toolbar" id="canvasToolbar" hidden>
+              <span style="padding:0 6px;font-size:11px;font-weight:600">已选中对象</span>
+              <span class="tb-sep"></span>
+              <button data-objact="front"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-maximize"/></svg>置顶</button>
+              <button data-objact="dup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-copy"/></svg>复制</button>
+              <button data-objact="del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg>删除</button>
+              <span class="tb-sep"></span>
+              <button data-objact="done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg>完成</button>
+            </div>
+          </main>
+
+          <!-- 右栏 -->
+          <aside class="panel-col" id="panelCol">
+            <div class="panel-switch">
+              <svg viewBox="0 0 24 24" width="15" height="15" style="color:var(--ink-3);flex:none" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bolt"/></svg>
+              <select class="select" id="toolSelect" aria-label="切换工具"></select>
+              <button class="icon-btn" id="btnPanelClose" data-tip="收起设置面板" aria-label="收起设置面板" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chevron-right"/></svg>
+              </button>
+            </div>
+
+            <div id="panelStack" style="display:flex;flex:1 1 auto;min-height:0">
+
+              <!-- ========== 1. 页面整理 ========== -->
+              <section class="tool-panel" data-panel="organize" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--lilac-soft);color:var(--lilac)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-layers"/></svg>
+                    </span>
+                    <h2>页面整理</h2>
+                  </div>
+                  <p class="tp-sub">在左侧拖动缩略图排序，勾选后批量处理。保存时生成新文件。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="group">
+                    <div class="between">
+                      <span class="group-label" style="flex:1">选中页面</span>
+                      <span class="chip chip-neutral" id="orgSelChip">已选 0 页</span>
+                    </div>
+                    <div class="row-2">
+                      <button class="btn btn-secondary btn-sm" data-pageact="rotate-l">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-rotate-l"/></svg>
+                        左转 90°
+                      </button>
+                      <button class="btn btn-secondary btn-sm" data-pageact="rotate-r">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-rotate"/></svg>
+                        右转 90°
+                      </button>
+                      <button class="btn btn-secondary btn-sm" data-pageact="dup">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-copy"/></svg>
+                        复制
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm" data-pageact="del">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-trash"/></svg>
+                        删除
+                      </button>
+                    </div>
+                    <p class="field-hint">删除页面会先从视图移除，保存前可随时撤销。</p>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">插入</span>
+                    <div class="row-inline">
+                      <select class="select" id="blankPos" style="flex:1">
+                        <option value="end">插入到文档末尾</option>
+                        <option value="after">插入到当前页之后</option>
+                        <option value="start">插入到文档开头</option>
+                      </select>
+                      <button class="btn btn-secondary btn-sm" id="btnInsertBlank">插入</button>
+                    </div>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">输出</span>
+                    <div class="field">
+                      <label class="field-label" for="orgOutName">文件名</label>
+                      <input class="input" id="orgOutName" value="输出_已整理.pdf">
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="orgOutDir">保存位置</label>
+                      <div class="input-group">
+                        <input class="input" id="orgOutDir" value="由系统保存窗口选择" readonly>
+                        <button class="btn btn-secondary btn-sm" data-tip="选择目录（未接入）" data-tip-pos="bottom" disabled>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-folder"/></svg>
+                        </button>
+                      </div>
+                      <span class="field-hint">点击保存后，系统会让你选择文件保存位置。</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="organize"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-ghost btn-sm" data-run="reset" data-tool="organize">还原</button>
+                    <button class="btn btn-primary" data-run="organize">保存为新文件</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== 2. 合并 ========== -->
+              <section class="tool-panel" data-panel="merge" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--sky-soft);color:var(--sky)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-merge"/></svg>
+                    </span>
+                    <h2>合并 PDF</h2>
+                  </div>
+                  <p class="tp-sub">按列表顺序合并，拖动可调整先后，中间栏实时预览页序。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="group">
+                    <div class="between">
+                      <span class="group-label" style="flex:1">文件顺序</span>
+                      <span class="chip chip-neutral" id="mergeCountChip">3 个文件</span>
+                    </div>
+                    <div class="file-list" id="mergeFiles"></div>
+                    <button class="btn btn-secondary btn-sm btn-block" id="btnMergeAdd">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>
+                      添加文件
+                    </button>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">选项</span>
+                    <label class="check-row">
+                      <input type="checkbox" id="mergeSep">
+                      每个文件之间插入一张空白分隔页
+                    </label>
+                    <label class="check-row">
+                      <input type="checkbox" disabled>
+                      保留原书签（暂不支持）
+                    </label>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">输出</span>
+                    <div class="field">
+                      <label class="field-label" for="mergeOutName">文件名</label>
+                      <input class="input" id="mergeOutName" value="合并结果.pdf">
+                    </div>
+                  </div>
+
+                  <div class="state-block is-notice">
+                    <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-info"/></svg></span>
+                    <div style="min-width:0">
+                      <div class="sb-title">加密文件暂不支持</div>
+                      <div class="sb-desc">请先在本机 PDF 阅读器中解锁并另存一份，再加入合并列表。密码不会传到云端。</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="merge"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-primary btn-block" data-run="merge">合并并另存</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== 3. 拆分与提取 ========== -->
+              <section class="tool-panel" data-panel="split" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--peach-soft);color:var(--peach)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-split"/></svg>
+                    </span>
+                    <h2>拆分与提取</h2>
+                  </div>
+                  <p class="tp-sub">按页码范围拆分，或把勾选的页面提取成新文件。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="group">
+                    <span class="group-label">拆分方式</span>
+                    <div class="segmented" id="splitMode" role="group" aria-label="拆分方式">
+                      <button aria-pressed="true" data-mode="range">按页码范围</button>
+                      <button aria-pressed="false" data-mode="every">每 N 页一份</button>
+                      <button aria-pressed="false" data-mode="picked">提取选中页</button>
+                    </div>
+                  </div>
+
+                  <div class="group" id="splitRangeGroup">
+                    <label class="field-label" for="pageRange">页码范围</label>
+                    <input class="input" id="pageRange" value="1-3, 5, 8-12" placeholder="例如 1-3, 5, 8-12">
+                    <span class="field-hint">用逗号分隔；连字符表示区间。当前文档共 <strong id="splitTotal">12</strong> 页。</span>
+                  </div>
+
+                  <div class="group" id="splitEveryGroup" hidden>
+                    <label class="field-label" for="everyN">每份页数</label>
+                    <input class="input num" id="everyN" value="2" inputmode="numeric" style="width:90px">
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">将产生</span>
+                    <div class="result-list" id="splitResult"></div>
+                    <p class="field-hint">拆分结果会打包为一个 ZIP 文件保存，解压后得到各个 PDF；原文件保持不变。</p>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">输出</span>
+                    <div class="field">
+                      <label class="field-label" for="splitPrefix">文件名前缀</label>
+                      <input class="input" id="splitPrefix" value="输出">
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="split"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-primary btn-block" data-run="split">拆分并另存</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== 4. 压缩 ========== -->
+              <section class="tool-panel" data-panel="compress" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--mint-soft);color:var(--mint)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-compress"/></svg>
+                    </span>
+                    <h2>压缩</h2>
+                  </div>
+                  <p class="tp-sub">只提供本机引擎能完成的标准压缩，不投递到任何服务器。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="group">
+                    <span class="group-label">压缩强度</span>
+                    <div class="opt-list">
+                      <label class="opt">
+                        <input type="radio" name="cmpLevel" checked>
+                        <div class="opt-main">
+                          <div class="opt-title">标准压缩 <span class="chip chip-brand" style="height:18px;font-size:10px">推荐</span></div>
+                          <div class="opt-desc">降低图片采样并清理冗余对象，文字保持清晰。</div>
+                        </div>
+                      </label>
+                      <label class="opt">
+                        <input type="radio" name="cmpLevel" disabled>
+                        <div class="opt-main">
+                          <div class="opt-title">极限压缩 <span class="chip chip-off" style="height:18px;font-size:10px">未接入</span></div>
+                          <div class="opt-desc">需要重排图像编码，当前本机引擎不支持，也不会改用云端。</div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">体积预估</span>
+                    <div class="size-cmp">
+                      <div class="size-row">
+                        <span>原始</span>
+                        <div class="size-bar"><span class="before" style="width:100%"></span></div>
+                        <span class="size-value">3.8 MB</span>
+                      </div>
+                      <div class="size-row">
+                        <span>预计</span>
+                        <div class="size-bar"><span class="after" style="width:42%"></span></div>
+                        <span class="size-value">1.6 MB</span>
+                      </div>
+                    </div>
+                    <p class="field-hint">预估基于当前设置；真实结果以处理完成为准，处理前会再次确认。</p>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">输出</span>
+                    <div class="field">
+                      <label class="field-label" for="cmpOutName">文件名</label>
+                      <input class="input" id="cmpOutName" value="输出_压缩.pdf">
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="compress"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-primary btn-block" data-run="compress">开始压缩</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== 5. 转换 ========== -->
+              <section class="tool-panel" data-panel="convert" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--sky-soft);color:var(--sky)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-convert"/></svg>
+                    </span>
+                    <h2>转换</h2>
+                  </div>
+                  <p class="tp-sub">只列出本机引擎确认支持的格式，其余一律标注未接入。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="group">
+                    <span class="group-label">方向</span>
+                    <div class="segmented" id="convDir" role="group" aria-label="转换方向">
+                      <button aria-pressed="true" data-dir="pdf2img">PDF → 图片</button>
+                      <button aria-pressed="false" data-dir="img2pdf">图片 → PDF</button>
+                      <button aria-pressed="false" data-dir="pdf2txt">PDF → 文本</button>
+                    </div>
+                  </div>
+
+                  <div class="group" id="convFormatGroup">
+                    <span class="group-label">输出格式</span>
+                    <div class="opt-list">
+                      <label class="opt">
+                        <input type="radio" name="convFmt" checked>
+                        <div class="opt-main">
+                          <div class="opt-title">PNG</div>
+                          <div class="opt-desc">无损，适合截图与图表页面。</div>
+                        </div>
+                      </label>
+                      <label class="opt">
+                        <input type="radio" name="convFmt">
+                        <div class="opt-main">
+                          <div class="opt-title">JPEG</div>
+                          <div class="opt-desc">体积更小，适合照片型页面。</div>
+                        </div>
+                      </label>
+                      <label class="opt">
+                        <input type="radio" name="convFmt" disabled>
+                        <div class="opt-main">
+                          <div class="opt-title">Word / PPT / HTML <span class="chip chip-off" style="height:18px;font-size:10px">未接入</span></div>
+                          <div class="opt-desc">需要本机 Office 或转换组件，当前版本未包含，也不会改用云端服务。</div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="group" id="convParamGroup">
+                    <span class="group-label">参数</span>
+                    <div class="row-2">
+                      <div class="field" id="convDpiField">
+                        <label class="field-label" for="convDpi">清晰度</label>
+                        <select class="select" id="convDpi">
+                          <option value="150">150 DPI</option>
+                          <option value="200" selected>200 DPI</option>
+                          <option value="300">300 DPI</option>
+                        </select>
+                      </div>
+                      <div class="field" id="convScopeField">
+                        <label class="field-label" for="convScope">页面范围</label>
+                        <select class="select" id="convScope">
+                          <option value="all" selected>全部页面</option>
+                          <option value="current">当前页</option>
+                          <option value="custom">自定义…</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="field" id="convRangeField" hidden>
+                      <label class="field-label" for="convRange">页码范围</label>
+                      <input class="input" id="convRange" placeholder="例如 1-3, 5">
+                    </div>
+                  </div>
+
+                  <div class="group" id="convImgGroup" hidden>
+                    <span class="group-label">图片文件</span>
+                    <div class="opt-list" id="convImgList"></div>
+                    <div class="row-inline" style="margin-top:8px">
+                      <button class="btn btn-secondary btn-sm" id="btnPickImages">选择图片…</button>
+                      <button class="btn btn-ghost btn-sm" id="btnClearImages">清空</button>
+                    </div>
+                    <p class="field-hint">按列表顺序每页一张，只支持 PNG 与 JPG。图片不会离开本机。</p>
+                  </div>
+
+                  <div class="group" id="convOrientGroup" hidden>
+                    <span class="group-label">页面方向</span>
+                    <div class="segmented" id="convOrient" role="group" aria-label="页面方向">
+                      <button aria-pressed="true" data-orient="auto">自动</button>
+                      <button aria-pressed="false" data-orient="portrait">纵向</button>
+                      <button aria-pressed="false" data-orient="landscape">横向</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="convert"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-primary btn-block" data-run="convert" id="btnConvertRun">转换并另存</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== 6. 页面编辑 ========== -->
+              <section class="tool-panel" data-panel="edit" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--peach-soft);color:var(--peach)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-edit"/></svg>
+                    </span>
+                    <h2>页面编辑</h2>
+                  </div>
+                  <p class="tp-sub">添加的内容以独立对象叠加在页面上，可拖动位置、调整大小。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="group">
+                    <span class="group-label">添加内容</span>
+                    <div class="segmented" id="editType" role="group" aria-label="编辑类型">
+                      <button aria-pressed="true" data-type="text">文本</button>
+                      <button aria-pressed="false" data-type="image">图片</button>
+                      <button aria-pressed="false" data-type="num">页码</button>
+                      <button aria-pressed="false" data-type="wm">水印</button>
+                      <button aria-pressed="false" data-type="stamp">印章</button>
+                    </div>
+                  </div>
+
+                  <div class="group" id="editTextGroup">
+                    <div class="field">
+                      <label class="field-label" for="editContent">内容</label>
+                      <textarea class="textarea" id="editContent">此页已核对 · 2026-11-16</textarea>
+                    </div>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">样式</span>
+                    <div class="field">
+                      <label class="field-label" for="editSize">字号</label>
+                      <div class="range-row">
+                        <input type="range" id="editSize" min="8" max="48" value="14">
+                        <span class="range-value num" id="editSizeVal">14 pt</span>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="editOpacity">不透明度</label>
+                      <div class="range-row">
+                        <input type="range" id="editOpacity" min="10" max="100" value="100">
+                        <span class="range-value num" id="editOpacityVal">100%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">位置</span>
+                    <div class="segmented" id="editPos" role="group" aria-label="位置">
+                      <button aria-pressed="false" data-pos="tl">左上</button>
+                      <button aria-pressed="true" data-pos="c">居中</button>
+                      <button aria-pressed="false" data-pos="bl">左下</button>
+                      <button aria-pressed="false" data-pos="br">右下</button>
+                    </div>
+                    <label class="check-row">
+                      <input type="checkbox" id="editAllPages">
+                      应用到全部页面
+                    </label>
+                  </div>
+
+                  <div class="state-block is-notice">
+                    <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-alert-triangle"/></svg></span>
+                    <div style="min-width:0">
+                      <div class="sb-title">修改 PDF 原有文字会改变排版</div>
+                      <div class="sb-desc">原文字依赖内嵌字体，编辑后字体、换行与页面布局可能变化。需要精确还原时，建议用“添加文本”叠加而不是改写原文。</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="edit"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-primary btn-block" id="btnAddObj">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>
+                      添加到页面
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== 7. 批注与签名 ========== -->
+              <section class="tool-panel" data-panel="annotate" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--lilac-soft);color:var(--lilac)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-comment"/></svg>
+                    </span>
+                    <h2>批注与签名</h2>
+                  </div>
+                  <p class="tp-sub">批注与签名都会写入副本，原文件保持不动。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="segmented" id="annoTab" role="group" aria-label="批注或签名">
+                    <button aria-pressed="true" data-tab="anno">批注</button>
+                    <button aria-pressed="false" data-tab="sign">签名</button>
+                  </div>
+
+                  <div class="group" id="annoGroup">
+                    <span class="group-label">工具</span>
+                    <div class="segmented" id="annoTool" role="group" aria-label="批注工具">
+                      <button aria-pressed="true" data-at="highlight" data-tip="高亮">高亮</button>
+                      <button aria-pressed="false" data-at="underline" data-tip="下划线">下划线</button>
+                      <button aria-pressed="false" data-at="note" data-tip="便笺">便笺</button>
+                    </div>
+                    <div class="segmented" id="annoTool2" role="group" aria-label="更多批注工具">
+                      <button aria-pressed="false" data-at="text">文本框</button>
+                      <button aria-pressed="false" data-at="draw">手绘</button>
+                      <button aria-pressed="false" data-at="shape">形状</button>
+                    </div>
+                    <div class="row-inline" style="margin-top:2px">
+                      <span class="field-label" style="margin-right:2px">颜色</span>
+                      <button class="swatch" data-color="#F6D45B" style="background:#F6D45B" aria-label="黄色"></button>
+                      <button class="swatch" data-color="#8FC7A8" style="background:#8FC7A8" aria-label="绿色"></button>
+                      <button class="swatch" data-color="#E99A9A" style="background:#E99A9A" aria-label="红色"></button>
+                      <button class="swatch" data-color="#9BC1E4" style="background:#9BC1E4" aria-label="蓝色"></button>
+                      <button class="swatch" data-color="#C7B9E6" style="background:#C7B9E6" aria-label="紫色"></button>
+                    </div>
+                    <p class="field-hint">选择工具后在中间页面上框选或点击，即可放置标记。</p>
+                  </div>
+
+                  <div class="group" id="signGroup" hidden>
+                    <span class="group-label">签名来源</span>
+                    <div class="segmented" id="signSrc" role="group" aria-label="签名来源">
+                      <button aria-pressed="true" data-src="type">键入</button>
+                      <button aria-pressed="false" data-src="draw">手写</button>
+                      <button aria-pressed="false" data-src="image">图片</button>
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="signText">签名文字</label>
+                      <input class="input" id="signText" value="林 小 满" style="font-family:var(--font);letter-spacing:.16em">
+                    </div>
+                    <div class="field">
+                      <label class="field-label" for="signDate">附带日期</label>
+                      <select class="select" id="signDate">
+                        <option selected>插入当天日期</option>
+                        <option>不插入日期</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="state-block is-demo">
+                    <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-alert-triangle"/></svg></span>
+                    <div style="min-width:0">
+                      <div class="sb-title">手写签名 ≠ 证书数字签名</div>
+                      <div class="sb-desc">这里的签名是图像标记，不具备加密验证能力。证书签名需要读取本机证书，当前未接入。</div>
+                      <div class="sb-actions">
+                        <button class="btn btn-secondary btn-sm" disabled>证书签名（未接入）</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="annotate"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-primary btn-block" data-run="annotate">应用到副本</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== 8. 表单填写 ========== -->
+              <section class="tool-panel" data-panel="form" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--sand-soft);color:var(--sand)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-form"/></svg>
+                    </span>
+                    <h2>表单填写</h2>
+                  </div>
+                  <p class="tp-sub">只显示 PDF 中真实存在的表单字段。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="group">
+                    <div class="between">
+                      <span class="group-label" style="flex:1">字段</span>
+                      <span class="chip chip-neutral">已填 1 / 3</span>
+                    </div>
+                    <div class="file-list">
+                      <div class="file-item" style="cursor:default">
+                        <span class="grip" style="color:var(--sage)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg></span>
+                        <span class="fi-icon" style="background:var(--sage-soft);color:var(--sage)">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-type"/></svg>
+                        </span>
+                        <div class="fi-main">
+                          <div class="fi-name">姓名</div>
+                          <div class="fi-meta">文本字段 · 第 1 页</div>
+                        </div>
+                        <span class="chip chip-neutral" style="height:20px">林小满</span>
+                      </div>
+                      <div class="file-item" style="cursor:default">
+                        <span class="grip" style="color:var(--ink-4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-minus"/></svg></span>
+                        <span class="fi-icon" style="background:var(--cream-2);color:var(--ink-3)">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-type"/></svg>
+                        </span>
+                        <div class="fi-main">
+                          <div class="fi-name">邮箱</div>
+                          <div class="fi-meta">文本字段 · 第 1 页 · 未填</div>
+                        </div>
+                      </div>
+                      <div class="file-item" style="cursor:default">
+                        <span class="grip" style="color:var(--ink-4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-minus"/></svg></span>
+                        <span class="fi-icon" style="background:var(--cream-2);color:var(--ink-3)">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-check"/></svg>
+                        </span>
+                        <div class="fi-main">
+                          <div class="fi-name">同意条款</div>
+                          <div class="fi-meta">复选框 · 第 2 页 · 未勾选</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">填写</span>
+                    <div class="field">
+                      <label class="field-label" for="formEmail">邮箱</label>
+                      <input class="input" id="formEmail" placeholder="name@example.com">
+                    </div>
+                    <label class="check-row">
+                      <input type="checkbox" id="formAgree">
+                      我已阅读并同意条款
+                    </label>
+                  </div>
+
+                  <div class="state-block is-notice">
+                    <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-info"/></svg></span>
+                    <div style="min-width:0">
+                      <div class="sb-title">扫描件里的表格无法填写</div>
+                      <div class="sb-desc">如果 PDF 只是图片，说明它没有表单字段。识别文字属于 OCR，需要额外引擎，当前不在本地范围内。</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="form"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-primary btn-block" data-run="form">保存填写结果</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== 9. 对比差异 ========== -->
+              <section class="tool-panel" data-panel="compare" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--sky-soft);color:var(--sky)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-compare"/></svg>
+                    </span>
+                    <h2>对比差异</h2>
+                  </div>
+                  <p class="tp-sub">并排比较两个版本，只看文字变化，不做云端分析。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="group">
+                    <span class="group-label">两个版本</span>
+                    <div class="file-list">
+                      <div class="file-item" style="cursor:default">
+                        <span class="grip" style="color:var(--ink-4)">A</span>
+                        <span class="fi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-file-pdf"/></svg></span>
+                        <div class="fi-main">
+                          <div class="fi-name">产品设计复盘_v2.pdf</div>
+                          <div class="fi-meta">12 页 · 3.8 MB</div>
+                        </div>
+                      </div>
+                      <div class="file-item" style="cursor:default">
+                        <span class="grip" style="color:var(--ink-4)">B</span>
+                        <span class="fi-icon" style="background:var(--sky-soft);color:var(--sky)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-file-pdf"/></svg></span>
+                        <div class="fi-main">
+                          <div class="fi-name">产品设计复盘_v3.pdf</div>
+                          <div class="fi-meta">13 页 · 4.1 MB</div>
+                        </div>
+                      </div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm btn-block" id="btnSwapCmp">交换 A / B</button>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">比较方式</span>
+                    <div class="segmented" id="cmpMode" role="group" aria-label="比较方式">
+                      <button aria-pressed="true">文字</button>
+                      <button aria-pressed="false">页面数</button>
+                    </div>
+                  </div>
+
+                  <div class="group">
+                    <span class="group-label">差异摘要</span>
+                    <div class="opt-list">
+                      <div class="opt" style="cursor:default">
+                        <div class="opt-main"><div class="opt-title">新增 <span class="chip chip-neutral" style="height:18px;font-size:10px">3 处</span></div><div class="opt-desc">第 4 页段落、第 7 页表格一行、第 12 页结论</div></div>
+                      </div>
+                      <div class="opt" style="cursor:default">
+                        <div class="opt-main"><div class="opt-title">删除 <span class="chip chip-neutral" style="height:18px;font-size:10px">1 处</span></div><div class="opt-desc">第 2 页脚注</div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="compare"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-primary btn-block" data-run="compare">开始比较</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== 10. 保护与文档信息 ========== -->
+              <section class="tool-panel" data-panel="protect" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--sage-soft);color:var(--sage)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg>
+                    </span>
+                    <h2>保护与文档信息</h2>
+                  </div>
+                  <p class="tp-sub">密码只在注册表中转成本机加密句柄，不会外传。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="segmented" id="protTab" role="group" aria-label="保护设置">
+                    <button aria-pressed="true" data-tab="pwd">密码</button>
+                    <button aria-pressed="false" data-tab="meta">文档信息</button>
+                    <button aria-pressed="false" data-tab="bm">书签</button>
+                  </div>
+
+                  <div id="protPwd">
+                    <div class="group">
+                      <span class="group-label">操作</span>
+                      <div class="opt-list">
+                        <label class="opt">
+                          <input type="radio" name="pwdMode" checked>
+                          <div class="opt-main">
+                            <div class="opt-title">设置打开密码</div>
+                            <div class="opt-desc">打开文件时需要输入密码。</div>
+                          </div>
+                        </label>
+                        <label class="opt">
+                          <input type="radio" name="pwdMode">
+                          <div class="opt-main">
+                            <div class="opt-title">设置权限密码</div>
+                            <div class="opt-desc">限制打印、复制与编辑，打开不受影响。</div>
+                          </div>
+                        </label>
+                        <label class="opt">
+                          <input type="radio" name="pwdMode">
+                          <div class="opt-main">
+                            <div class="opt-title">移除密码</div>
+                            <div class="opt-desc">需先输入当前密码，移除后另存副本。</div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="group">
+                      <span class="group-label">密码</span>
+                      <div class="field">
+                        <label class="field-label" for="newPwd">新密码</label>
+                        <input class="input" type="password" id="newPwd" placeholder="至少 6 位">
+                      </div>
+                      <div class="field">
+                        <label class="field-label" for="newPwd2">确认密码</label>
+                        <input class="input" type="password" id="newPwd2" placeholder="再输入一次">
+                      </div>
+                      <div class="size-cmp" style="margin-top:2px">
+                        <div class="size-row" style="grid-template-columns:1fr auto">
+                          <div class="size-bar"><span class="after" style="width:28%"></span></div>
+                          <span class="size-value" id="pwdStrength">偏弱</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="group">
+                      <span class="group-label">权限</span>
+                      <label class="check-row"><input type="checkbox" checked> 允许打印</label>
+                      <label class="check-row"><input type="checkbox"> 允许复制文字</label>
+                      <label class="check-row"><input type="checkbox"> 允许修改内容</label>
+                    </div>
+                  </div>
+
+                  <div id="protMeta" hidden>
+                    <div class="group">
+                      <span class="group-label">元数据</span>
+                      <div class="field">
+                        <label class="field-label" for="metaTitle">标题</label>
+                        <input class="input" id="metaTitle" value="2026 年度产品设计复盘">
+                      </div>
+                      <div class="field">
+                        <label class="field-label" for="metaAuthor">作者</label>
+                        <input class="input" id="metaAuthor" value="林小满">
+                      </div>
+                      <div class="field">
+                        <label class="field-label" for="metaSubject">主题</label>
+                        <input class="input" id="metaSubject" value="设计系统与体验改进">
+                      </div>
+                      <div class="field">
+                        <label class="field-label" for="metaKeys">关键词</label>
+                        <input class="input" id="metaKeys" value="设计系统; PDF; 本地工具">
+                      </div>
+                      <p class="field-hint">元数据会写入新文件，原文件属性不变。</p>
+                    </div>
+                  </div>
+
+                  <div id="protBm" hidden>
+                    <div class="group">
+                      <span class="group-label">目录</span>
+                      <div class="file-list">
+                        <div class="file-item" style="cursor:default">
+                          <span class="grip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-grip"/></svg></span>
+                          <span class="fi-icon" style="background:var(--sage-soft);color:var(--sage)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bookmark"/></svg></span>
+                          <div class="fi-main"><div class="fi-name">一、设计目标</div><div class="fi-meta">第 2 页</div></div>
+                          <span class="fi-actions"><button class="icon-btn" aria-label="删除书签"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-x"/></svg></button></span>
+                        </div>
+                        <div class="file-item" style="cursor:default">
+                          <span class="grip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-grip"/></svg></span>
+                          <span class="fi-icon" style="background:var(--sage-soft);color:var(--sage)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bookmark"/></svg></span>
+                          <div class="fi-main"><div class="fi-name">二、关键改动</div><div class="fi-meta">第 5 页</div></div>
+                          <span class="fi-actions"><button class="icon-btn" aria-label="删除书签"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-x"/></svg></button></span>
+                        </div>
+                        <div class="file-item" style="cursor:default">
+                          <span class="grip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-grip"/></svg></span>
+                          <span class="fi-icon" style="background:var(--sage-soft);color:var(--sage)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bookmark"/></svg></span>
+                          <div class="fi-main"><div class="fi-name">三、下一步</div><div class="fi-meta">第 11 页</div></div>
+                          <span class="fi-actions"><button class="icon-btn" aria-label="删除书签"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-x"/></svg></button></span>
+                        </div>
+                      </div>
+                      <button class="btn btn-secondary btn-sm btn-block" id="btnAddBm">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>
+                        以当前页添加书签
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="protect"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-primary btn-block" data-run="protect">应用到副本</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ========== 11. 脱敏与清理 ========== -->
+              <section class="tool-panel" data-panel="redact" hidden>
+                <div class="tp-head">
+                  <div class="tp-title">
+                    <span class="tool-icon" style="background:var(--danger-soft);color:var(--danger)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-eye-off"/></svg>
+                    </span>
+                    <h2>脱敏与清理</h2>
+                  </div>
+                  <p class="tp-sub">脱敏会永久移除内容，不可恢复。请先复核再确认。</p>
+                </div>
+                <div class="tp-body scroll-y">
+                  <div class="segmented" id="redTab" role="group" aria-label="脱敏或清理">
+                    <button aria-pressed="true" data-tab="redact">脱敏</button>
+                    <button aria-pressed="false" data-tab="clean">清理</button>
+                  </div>
+
+                  <div id="redactGroup">
+                    <div class="group">
+                      <span class="group-label">标记方式</span>
+                      <div class="segmented" id="redMode" role="group" aria-label="标记方式">
+                        <button aria-pressed="true" data-m="text">选择文字</button>
+                        <button aria-pressed="false" data-m="area">绘制区域</button>
+                      </div>
+                      <button class="btn btn-secondary btn-sm btn-block" id="btnMarkDemo">在当前页标记 2 处示例</button>
+                    </div>
+
+                    <div class="group">
+                      <span class="group-label">待脱敏标记</span>
+                      <div class="result-list" id="redList">
+                        <div class="result-item">
+                          <span class="chip chip-neutral" style="height:18px">第 1 页</span>
+                          <span class="ri-name">身份证号 ····12</span>
+                          <span class="ri-meta">文字</span>
+                        </div>
+                        <div class="result-item">
+                          <span class="chip chip-neutral" style="height:18px">第 1 页</span>
+                          <span class="ri-name">电话 138****</span>
+                          <span class="ri-meta">文字</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="state-block is-error">
+                      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-alert-triangle"/></svg></span>
+                      <div style="min-width:0">
+                        <div class="sb-title">不可撤销</div>
+                        <div class="sb-desc">脱敏会删除底层内容，其结果无法通过撤销恢复。原文件会保留，结果始终另存为新文件。</div>
+                      </div>
+                    </div>
+
+                    <label class="check-row" style="align-items:flex-start">
+                      <input type="checkbox" id="redConfirm" style="margin-top:3px">
+                      <span>我已复核标记位置，确认永久移除这些内容</span>
+                    </label>
+                  </div>
+
+                  <div id="cleanGroup" hidden>
+                    <div class="group">
+                      <span class="group-label">清理项</span>
+                      <label class="check-row"><input type="checkbox" checked> 移除脚本与自动动作</label>
+                      <label class="check-row"><input type="checkbox" checked> 清理隐藏图层与冗余对象</label>
+                      <label class="check-row"><input type="checkbox"> 扁平化表单字段</label>
+                      <label class="check-row"><input type="checkbox"> 移除全部附件</label>
+                      <p class="field-hint">清理同样另存副本，原文件不被改写。</p>
+                    </div>
+                    <div class="state-block is-notice">
+                      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-info"/></svg></span>
+                      <div style="min-width:0">
+                        <div class="sb-title">清理后的文件可能无法再编辑</div>
+                        <div class="sb-desc">扁平化会把表单变成普通图形，之后无法填写。建议保留一份原始副本。</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tp-foot">
+                  <div class="tp-state" data-state-for="redact"></div>
+                  <div class="tp-foot-row">
+                    <button class="btn btn-danger btn-block" data-run="redact" id="btnRedactRun" disabled>
+                      确认脱敏并另存
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+          </aside>
+        </div>
+
+        <div class="statusbar">
+          <span class="sb-group">
+            <span class="sb-status-dot" id="sbStatusDot"></span>
+            <strong id="sbStatus">就绪</strong>
+          </span>
+          <span class="sb-group" id="sbDetail">页 1 / 12 · 适应宽度 100%</span>
+          <span class="spacer"></span>
+          <span class="sb-group" id="sbSelInfo">未选择页面</span>
+          <span style="width:1px;height:12px;background:var(--line-2)"></span>
+          <span class="sb-group">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lock"/></svg>
+            仅本机 · 未建立任何网络连接
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 设置 ---------- -->
+    <section class="view" id="viewSettings" hidden>
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>设置</h1>
+          <p>全部设置都在本机生效，不涉及任何云账号</p>
+        </div>
+        <div class="topbar-spacer"></div>
+        <span class="chip chip-lg chip-local">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lock"/></svg>
+          仅本机处理
+        </span>
+      </header>
+
+      <div class="view-scroll scroll-y">
+        <div class="settings-wrap">
+          <div class="mode-card" style="margin-bottom:24px">
+            <span class="mc-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg>
+            </span>
+            <div>
+              <h3>当前连接模式：仅本机 <span class="chip chip-lg" style="background:#FFF;color:#2D5442;border-color:#CFE2D5">已锁定</span></h3>
+              <p>PDF 与相关文件只在本机读写。应用不提供登录、云盘、在线处理或文件分享，也没有可在后台切换的云端通道。</p>
+            </div>
+          </div>
+
+          <div class="set-group">
+            <div class="set-group-title">处理与隐私</div>
+            <div class="set-card">
+              <div class="set-row">
+                <div class="sr-main">
+                  <div class="sr-title">网络请求</div>
+                  <div class="sr-desc">应用不发起任何上传或远程处理请求。检查更新与遥测也保持关闭。</div>
+                </div>
+                <div class="sr-side"><span class="chip chip-local">未启用</span></div>
+              </div>
+              <div class="set-row">
+                <div class="sr-main">
+                  <div class="sr-title">保存最近文件记录</div>
+                  <div class="sr-desc">仅在当前运行期间保留文件名；浏览器不开放完整路径，关闭页面后记录清除。</div>
+                </div>
+                <div class="sr-side">
+                  <label class="switch"><input type="checkbox" id="setRecent" checked><span class="switch-track"></span></label>
+                </div>
+              </div>
+              <div class="set-row">
+                <div class="sr-main">
+                  <div class="sr-title">清除最近文件记录</div>
+                  <div class="sr-desc">清空列表，不会删除任何原始 PDF 文件。当前记录 <strong id="setRecentNum">3</strong> 条。</div>
+                </div>
+                <div class="sr-side">
+                  <button class="btn btn-secondary btn-sm" id="btnClearRecent3">清除记录</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="set-group">
+            <div class="set-group-title">文件与目录</div>
+            <div class="set-card">
+              <div class="set-row">
+                <div class="sr-main">
+                  <div class="sr-title">默认输出目录 <span class="chip chip-off">未接入</span></div>
+                  <div class="sr-desc">接入引擎后，处理结果默认另存到该目录，永不覆盖原文件。</div>
+                </div>
+                <div class="sr-side">
+                  <button class="btn btn-secondary btn-sm" disabled>选择目录</button>
+                </div>
+              </div>
+              <div class="set-row">
+                <div class="sr-main">
+                  <div class="sr-title">临时文件清理 <span class="chip chip-off">未接入</span></div>
+                  <div class="sr-desc">处理数据在当前标签页内存中生成；关闭页面后释放。应用不上传文件。</div>
+                </div>
+                <div class="sr-side">
+                  <button class="btn btn-secondary btn-sm" disabled>立即清理</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="set-group">
+            <div class="set-group-title">界面</div>
+            <div class="set-card">
+              <div class="set-row">
+                <div class="sr-main">
+                  <div class="sr-title">语言</div>
+                  <div class="sr-desc">界面文案默认简体中文。</div>
+                </div>
+                <div class="sr-side">
+                  <select class="select" style="width:140px" id="setLang">
+                    <option selected>简体中文</option>
+                    <option disabled>English（未接入）</option>
+                  </select>
+                </div>
+              </div>
+              <div class="set-row">
+                <div class="sr-main">
+                  <div class="sr-title">缩略图栏默认显示</div>
+                  <div class="sr-desc">窗口宽度不足 1080px 时自动折叠为抽屉。</div>
+                </div>
+                <div class="sr-side">
+                  <label class="switch"><input type="checkbox" checked><span class="switch-track"></span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="set-group">
+            <div class="set-group-title">关于</div>
+            <div class="set-card">
+              <div class="set-row">
+                <div class="sr-main">
+                  <div class="sr-title">纸间 PDF · 0.1.0 本机版</div>
+                  <div class="sr-desc">当前已接入真实 PDF 合并、拆分与页面整理。使用本机浏览器处理，不上传 PDF。</div>
+                </div>
+              </div>
+              <div class="set-row">
+                <div class="sr-main">
+                  <div class="sr-title">本地能力清单</div>
+                  <div class="sr-desc">已接入：页面整理（排序、旋转、复制、删除、空白页）、合并、按范围/每 N 页/选中页拆分。压缩、转换、批注、签名、表单、密码、书签保留与脱敏尚未接入。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- 文件选择器 -->
+<input type="file" id="fileInput" accept="application/pdf,.pdf" multiple hidden>
+<input type="file" id="imgInput" accept="image/png,image/jpeg,.png,.jpg,.jpeg" multiple hidden>
+
+<!-- 对话框容器 -->
+<div id="overlayMount"></div>
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+
+<script src="vendor/pdf.min.js"></script>
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="vendor/jszip.min.js"></script>
+<script src="assets/render.js"></script>
+<script src="assets/pdf-pages.js"></script>
+<script src="assets/pdf-convert.js"></script>
+<script src="assets/pdf-engine.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

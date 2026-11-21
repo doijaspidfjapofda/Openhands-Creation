@@ -1,0 +1,22 @@
+{
+  "name": "zhijian-pdf-local",
+  "version": "0.1.0",
+  "private": true,
+  "description": "纸间 PDF · 仅本机运行的 PDF 工具（无上传、无云端处理）",
+  "scripts": {
+    "start": "node server.js",
+    "desktop": "electron .",
+    "test": "node tests/run-all.mjs",
+    "test:e2e": "node tests/run-all.mjs --with-e2e",
+    "test:all": "node tests/run-all.mjs --with-e2e",
+    "package:win": "node scripts/package-win.mjs"
+  },
+  "devDependencies": {
+    "@electron/packager": "18.3.6",
+    "electron": "33.2.1",
+    "pdfjs-dist": "3.11.174",
+    "playwright": "1.49.1"
+  },
+  "productName": "纸间PDF",
+  "main": "desktop/main.js"
+}
