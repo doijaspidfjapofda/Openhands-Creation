@@ -80,6 +80,7 @@
     zoom: 1,
     hist: null,
     busy: false,
+    loading: false,
     recent: [],
     recentOn: true,
     mergeFiles: [
@@ -288,6 +289,7 @@
   }
 
   function openLocalPdf(file) {
+    S.loading = true;
     setLoading(true);
     return ZJRender.loadPdf(file).then(function (doc) {
       activateDoc(doc);
@@ -295,8 +297,16 @@
     }).catch(function (err) {
       return handleOpenError(err, file);
     }).then(function () {
+      S.loading = false;
       setStatus('ready', '就绪');
     });
+  }
+
+  /* 打开文件期间页面仍显示上一份文档，此时的操作会被载入结果覆盖，直接拒绝 */
+  function blockWhileLoading() {
+    if (!S.loading) return false;
+    showToast('文件正在打开，请稍候', 'warn');
+    return true;
   }
 
   function handleOpenError(err, file) {
@@ -650,6 +660,7 @@
   }
 
   function pageAct(act, idx) {
+    if (blockWhileLoading()) return;
     if (!S.doc) { showToast('先打开一个 PDF', 'warn'); return; }
     var list = typeof idx === 'number' ? [idx] : targets();
     if (!list.length || S.pages[list[0]] === undefined) return;
@@ -691,6 +702,7 @@
   }
 
   function insertBlank(pos) {
+    if (blockWhileLoading()) return;
     if (!S.doc) { showToast('先打开一个 PDF', 'warn'); return; }
     var at = pos === 'start' ? 0 : pos === 'end' ? S.pages.length : S.current + 1;
     var inserted = ZJPages.insertBlank(S.pages, at, ZJPages.blankDims(S.pages, at));
@@ -1260,6 +1272,21 @@
     var ext = found[0].toLowerCase();
     if (ext === '.jpeg') ext = '.jpg';
     var meta = SAVE_TYPES[ext] || SAVE_TYPES['.pdf'];
+
+    if (window.zjDesktop && typeof window.zjDesktop.saveFile === 'function') {
+      return blob.arrayBuffer().then(function (buffer) {
+        return window.zjDesktop.saveFile(name, new Uint8Array(buffer));
+      }).then(function (result) {
+        if (!result || result.canceled) {
+          var cancel = new Error('已取消保存');
+          cancel.name = 'AbortError';
+          throw cancel;
+        }
+        if (result.error) throw new Error(result.error);
+        return { name: result.name || name, location: result.path || '已保存' };
+      });
+    }
+
     if (typeof window.showSaveFilePicker === 'function') {
       var type = meta.mime;
       var pickerOpened = false;
@@ -1307,6 +1334,7 @@
   }
 
   function startRun(tool) {
+    if (blockWhileLoading()) return;
     if (tool === 'convert') { startConvert(); return; }
     var pre = preflight(tool);
     if (!pre.ok) {
@@ -1947,6 +1975,7 @@
     $('#thumbList').addEventListener('drop', function (e) {
       var t = e.target.closest('.thumb');
       if (!t || dragIdx === null) return;
+      if (blockWhileLoading()) return;
       e.preventDefault();
       var to = parseInt(t.dataset.idx, 10);
       var r = t.getBoundingClientRect();

@@ -59,6 +59,15 @@ page.on('pageerror', (err) => pageErrors.push(err.message));
 
 await page.goto(baseUrl, { waitUntil: 'load' });
 
+async function waitUntil(fn, timeout = 30000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    if (await page.evaluate(fn)) return;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  throw new Error('等待页面条件超时');
+}
+
 const SRC = await makePdf([
   { text: 'E2E-PAGE-1' }, { text: 'E2E-PAGE-2' }, { text: 'E2E-PAGE-3' }, { text: 'E2E-PAGE-4' }
 ]);
@@ -82,8 +91,8 @@ await test('断网环境下界面仍能加载（所有资源均在本机）', as
 await test('打开真实 PDF 后显示文件名、页数和缩略图', async () => {
   await page.setInputFiles('#fileInput', { name: 'e2e-sample.pdf', mimeType: 'application/pdf', buffer: Buffer.from(SRC) });
   await page.waitForSelector('#viewWorkspace:not([hidden])', { timeout: 30000 });
-  await page.waitForFunction(() => document.querySelector('#wsFileName').textContent === 'e2e-sample.pdf');
-  await page.waitForFunction(() => document.querySelectorAll('#thumbList .thumb').length === 4, null, { timeout: 30000 });
+  await waitUntil(() => document.querySelector('#wsFileName').textContent === 'e2e-sample.pdf');
+  await waitUntil(() => document.querySelectorAll('#thumbList .thumb').length === 4);
   const sub = await page.textContent('#wsFileSub');
   assert(/4 页/.test(sub), '页数显示：' + sub);
 });
@@ -124,6 +133,36 @@ await test('删除页面后导出页数减少（撤销可恢复）', async () =>
   await page.click('#btnUndo');
 });
 
+await test('拖动缩略图排序后导出顺序随之改变', async () => {
+  await page.setInputFiles('#fileInput', { name: 'drag.pdf', mimeType: 'application/pdf', buffer: Buffer.from(SRC) });
+  await waitUntil(() => document.querySelector('#wsFileName').textContent === 'drag.pdf'
+    && document.querySelectorAll('#thumbList .thumb').length === 4
+    && /就绪/.test(document.querySelector('#sbStatus').textContent));
+
+  const src = await page.locator('#thumbList .thumb[data-idx="0"]').boundingBox();
+  const dst = await page.locator('#thumbList .thumb[data-idx="2"]').boundingBox();
+  await page.mouse.move(src.x + src.width / 2, src.y + src.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(src.x + src.width / 2, src.y + src.height / 2 + 12, { steps: 3 });
+  await page.mouse.move(dst.x + dst.width / 2, dst.y + dst.height * 0.8, { steps: 15 });
+  await page.mouse.up();
+  await waitUntil(() => /已移动页面/.test(document.querySelector('#toastStack').textContent || ''));
+
+  const saved = await saveDownload(async () => {
+    await page.click('[data-run="organize"]');
+    await page.waitForSelector('[data-dlg-ok]');
+    await page.click('[data-dlg-ok]');
+  });
+  const info = await inspect(saved.bytes);
+  assertEqual(info.pageCount, 4, '导出页数');
+  assertEqual(info.pages.map((p) => p.text), ['E2E-PAGE-2', 'E2E-PAGE-3', 'E2E-PAGE-1', 'E2E-PAGE-4'], '拖动后的页序');
+
+  await page.setInputFiles('#fileInput', { name: 'e2e-sample.pdf', mimeType: 'application/pdf', buffer: Buffer.from(SRC) });
+  await waitUntil(() => document.querySelector('#wsFileName').textContent === 'e2e-sample.pdf'
+    && document.querySelectorAll('#thumbList .thumb').length === 4
+    && /就绪/.test(document.querySelector('#sbStatus').textContent));
+});
+
 await test('拆分：按页码范围生成 ZIP，解压后页数正确', async () => {
   await page.click('.nav-item[data-tool="split"]');
   await page.waitForSelector('[data-panel="split"]:not([hidden])');
@@ -146,7 +185,7 @@ await test('合并：两个本机 PDF 按列表顺序合并', async () => {
     { name: 'ma.pdf', mimeType: 'application/pdf', buffer: Buffer.from(MERGE_A) },
     { name: 'mb.pdf', mimeType: 'application/pdf', buffer: Buffer.from(MERGE_B) }
   ]);
-  await page.waitForFunction(() => document.querySelectorAll('#mergeFiles .file-item').length === 2, null, { timeout: 30000 });
+  await waitUntil(() => document.querySelectorAll('#mergeFiles .file-item').length === 2);
   const saved = await saveDownload(() => page.click('[data-run="merge"]'));
   const info = await inspect(saved.bytes);
   assertEqual(info.pageCount, 5, '合并页数');
@@ -185,7 +224,7 @@ await test('转换：图片 → PDF 按顺序生成两页', async () => {
     { name: 'wide.png', mimeType: 'image/png', buffer: Buffer.from(makePng(300, 200)) },
     { name: 'tall.png', mimeType: 'image/png', buffer: Buffer.from(makePng(200, 400)) }
   ]);
-  await page.waitForFunction(() => document.querySelectorAll('#convImgList .result-item').length === 2, null, { timeout: 15000 });
+  await waitUntil(() => document.querySelectorAll('#convImgList .result-item').length === 2);
   const saved = await saveDownload(() => page.click('[data-run="convert"]'));
   const info = await inspect(saved.bytes);
   assertEqual(info.pageCount, 2, '图片 PDF 页数');

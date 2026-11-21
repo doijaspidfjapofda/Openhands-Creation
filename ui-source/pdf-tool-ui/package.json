@@ -9,7 +9,8 @@
     "test": "node tests/run-all.mjs",
     "test:e2e": "node tests/run-all.mjs --with-e2e",
     "test:all": "node tests/run-all.mjs --with-e2e",
-    "package:win": "node scripts/package-win.mjs"
+    "package:win": "node scripts/package-win.mjs",
+    "test:desktop": "node tests/electron.test.mjs"
   },
   "devDependencies": {
     "@electron/packager": "18.3.6",

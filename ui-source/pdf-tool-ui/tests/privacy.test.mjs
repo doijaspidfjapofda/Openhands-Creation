@@ -29,6 +29,16 @@ await test('页面只加载本机脚本与样式', async () => {
   assert(refs.includes('assets/pdf-convert.js') && refs.includes('assets/pdf-pages.js'), '应加载本机处理模块');
 });
 
+await test('页面设置了内容安全策略（禁止外部脚本与 eval）', async () => {
+  const html = source['index.html'];
+  const csp = html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/);
+  assert(csp, '应包含 CSP meta');
+  assert(/script-src 'self'/.test(csp[1]), '脚本只允许同源');
+  assert(!/unsafe-eval/.test(csp[1]), '不应允许 eval');
+  assert(/object-src 'none'/.test(csp[1]), '应禁用插件对象');
+  assert(/form-action 'none'/.test(csp[1]), '应禁止表单提交');
+});
+
 await test('没有上传表单或云端处理入口', async () => {
   const html = source['index.html'];
   assert(!/<form\b/i.test(html), '界面不应包含提交表单');

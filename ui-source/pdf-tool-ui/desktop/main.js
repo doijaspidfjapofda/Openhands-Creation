@@ -1,6 +1,7 @@
 /* 纸间 PDF 桌面外壳：启动本机服务并用应用窗口打开界面。
    仍然只在本机读写文件，不包含任何联网或遥测代码。 */
-const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
+const { app, BrowserWindow, Menu, shell, dialog, ipcMain } = require('electron');
+const fs = require('fs');
 const path = require('path');
 const { start } = require(path.join(__dirname, '..', 'server.js'));
 
@@ -30,7 +31,8 @@ async function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
-      spellcheck: false
+      spellcheck: false,
+      preload: path.join(__dirname, 'preload.js')
     }
   });
 
@@ -71,6 +73,36 @@ async function createWindow() {
   mainWindow.on('closed', () => { mainWindow = null; });
   await mainWindow.loadURL(started.url);
 }
+
+const SAVE_FILTERS = {
+  '.pdf': [{ name: 'PDF 文档', extensions: ['pdf'] }],
+  '.zip': [{ name: 'ZIP 压缩包', extensions: ['zip'] }],
+  '.txt': [{ name: '纯文本', extensions: ['txt'] }],
+  '.png': [{ name: 'PNG 图片', extensions: ['png'] }],
+  '.jpg': [{ name: 'JPEG 图片', extensions: ['jpg', 'jpeg'] }]
+};
+
+ipcMain.handle('zj:save-file', async (event, payload) => {
+  const name = String((payload && payload.name) || '输出.pdf');
+  const bytes = payload && payload.bytes;
+  if (!bytes) return { canceled: false, error: '没有可保存的数据。' };
+
+  const ext = ((name.match(/\.[a-z0-9]+$/i) || ['.pdf'])[0] || '.pdf').toLowerCase();
+  const win = BrowserWindow.fromWebContents(event.sender);
+  const result = await dialog.showSaveDialog(win, {
+    title: '另存为新文件',
+    defaultPath: path.join(app.getPath('documents'), name),
+    filters: SAVE_FILTERS[ext] || [{ name: '所有文件', extensions: ['*'] }]
+  });
+  if (result.canceled || !result.filePath) return { canceled: true };
+
+  try {
+    fs.writeFileSync(result.filePath, Buffer.from(bytes));
+    return { canceled: false, path: result.filePath, name: path.basename(result.filePath) };
+  } catch (err) {
+    return { canceled: false, error: '写入文件失败：' + ((err && err.message) || err) };
+  }
+});
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
