@@ -27,6 +27,11 @@ node scripts/make-icon.mjs  # 重新生成 desktop/icon.ico
   桌面测试通过替换 `dialog.showSaveDialog` 把文件写到临时目录。
 - `tests/electron.test.mjs`：支持 `ZJ_APP_TARGET=<app.asar>` 直接验证打包产物。
 
+## 待办入口
+
+- 缺陷与改进清单在仓库根目录 `PRD-改进与缺陷清单.md`。未确认前不要改代码；确认后按条目逐条实施，
+  每条先补复现测试，改完更新该文件状态列并跑满 92 项回归。
+
 ## 环境注意
 
 - 页面带严格 CSP，Playwright 的 `page.waitForFunction` 会被 CSP 拒绝；测试里用 `waitUntil()` 轮询 `page.evaluate`。

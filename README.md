@@ -9,6 +9,7 @@
 | `ui-source/pdf-tool-ui/` | 应用主体：界面、本机处理引擎、桌面外壳、测试与打包脚本 |
 | `本地PDF工具_UI开发需求文档.md` | 早期 UI 需求文档（产品方向参考） |
 | `pdf-tool-ui.rar` | 需求方提供的主代码压缩包（已解压到上述目录，保留原包备查） |
+| `PRD-改进与缺陷清单.md` | 待确认的缺陷与改进清单（后续改动的唯一入口，按条目逐项实施） |
 
 应用的功能状态、限制、测试方式和 Windows 产物说明见
 [`ui-source/pdf-tool-ui/README.md`](ui-source/pdf-tool-ui/README.md)。
