@@ -1,6 +1,6 @@
 {
   "name": "zhijian-pdf-local",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "纸间 PDF · 仅本机运行的 PDF 工具（无上传、无云端处理）",
   "scripts": {
