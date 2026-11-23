@@ -186,6 +186,32 @@ await test('运行期间没有外部请求或脚本错误', async () => {
   assertEqual(pageErrors, [], '页面脚本错误');
 });
 
+await test('BUG-06 最近记录保存本机路径，重开窗口后可从列表重新打开', async () => {
+  const recentPath = path.join(downloadDir, 'recent-desktop.pdf');
+  await fs.writeFile(recentPath, SRC);
+  await page.setInputFiles('#fileInput', recentPath);
+  await page.waitForSelector('#viewWorkspace:not([hidden])', { timeout: 30000 });
+  for (let i = 0; i < 100; i++) {
+    if (await page.evaluate(() => document.querySelector('#wsFileName').textContent === 'recent-desktop.pdf')) break;
+    await new Promise((r) => setTimeout(r, 150));
+  }
+  const recents = JSON.parse(await page.evaluate(() => localStorage.getItem('zj.recent.v1') || '[]'));
+  assertEqual(recents[0] && recents[0].name, 'recent-desktop.pdf', '最近记录第一条');
+  assertEqual(recents[0] && recents[0].path, recentPath, '应保存本机路径');
+
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('#recentCard .rec-row');
+  await page.locator('#recentCard .rec-row', { hasText: 'recent-desktop.pdf' }).first().click();
+  await page.waitForSelector('#viewWorkspace:not([hidden])', { timeout: 30000 });
+  let reopened = false;
+  for (let i = 0; i < 200 && !reopened; i++) {
+    await new Promise((r) => setTimeout(r, 150));
+    reopened = await page.evaluate(() => document.querySelector('#wsFileName').textContent === 'recent-desktop.pdf'
+      && document.querySelectorAll('#thumbList .thumb').length === 4);
+  }
+  assert(reopened, '重开窗口后应能按路径重新打开文件');
+});
+
 async function windowCount() {
   try { return app.windows().length; } catch (e) { return 0; }
 }

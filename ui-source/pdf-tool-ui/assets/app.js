@@ -99,6 +99,62 @@
   var loadCancelled = false;
   var dirty = false;
 
+  var RECENT_KEY = 'zj.recent.v1';
+  var RECENT_ON_KEY = 'zj.recentOn.v1';
+
+  /* 最近文件只保存文件名、页数、大小、时间和（桌面版）路径，不保存文件内容 */
+  function loadRecentStore() {
+    try {
+      var raw = localStorage.getItem(RECENT_KEY);
+      if (!raw) return [];
+      var list = JSON.parse(raw);
+      if (!Array.isArray(list)) return [];
+      return list.filter(function (r) {
+        return r && typeof r.name === 'string' && r.name;
+      }).slice(0, 6).map(function (r) {
+        return {
+          name: r.name,
+          path: typeof r.path === 'string' ? r.path : '',
+          pages: Number(r.pages) || 0,
+          size: typeof r.size === 'string' ? r.size : '',
+          when: typeof r.when === 'string' ? r.when : '',
+          file: null,
+          demo: false,
+          restored: true
+        };
+      });
+    } catch (e) { return []; }
+  }
+
+  function saveRecentStore() {
+    try {
+      localStorage.setItem(RECENT_KEY, JSON.stringify(S.recent.map(function (r) {
+        return { name: r.name, path: r.path || '', pages: r.pages, size: r.size, when: r.when };
+      })));
+    } catch (e) {}
+  }
+
+  function loadRecentOn() {
+    try {
+      var v = localStorage.getItem(RECENT_ON_KEY);
+      return v === null ? true : v === '1';
+    } catch (e) { return true; }
+  }
+
+  function saveRecentOn() {
+    try { localStorage.setItem(RECENT_ON_KEY, S.recentOn ? '1' : '0'); } catch (e) {}
+  }
+
+  /* 桌面版可以通过 Electron 拿到真实路径，浏览器版返回空字符串 */
+  function desktopPath(file) {
+    try {
+      if (file && window.zjDesktop && typeof window.zjDesktop.filePath === 'function') {
+        return window.zjDesktop.filePath(file) || '';
+      }
+    } catch (e) {}
+    return '';
+  }
+
   /* ============================================================
      3. 视图路由
      ============================================================ */
@@ -180,7 +236,7 @@
       '<span class="rec-file-icon">' + icon('file-pdf') + '</span>' +
       '<div class="rec-main">' +
         '<div class="rec-name">' + esc(r.name) + '</div>' +
-        '<div class="rec-path">' + esc(r.path) + '</div>' +
+        '<div class="rec-path">' + esc(r.path || (r.restored ? '重启后记录 · 需要重新选择文件' : '本机文件 · 路径不保存')) + '</div>' +
       '</div>' +
       '<span class="rec-meta">' + r.pages + ' 页 · ' + r.size + ' · ' + r.when + '</span>' +
       '<div class="row-actions">' +
@@ -195,7 +251,7 @@
     var empty = '<div class="empty">' +
       '<span class="empty-art">' + icon('clock') + '</span>' +
       '<h3>还没有最近文件</h3>' +
-      '<p>打开过的 PDF 会出现在这里。记录只在本次运行期间保留文件名，不保存文件内容或完整路径。</p>' +
+      '<p>打开过的 PDF 会出现在这里。记录只保存文件名、页数、大小和时间，不保存文件内容。</p>' +
       '<button class="btn btn-secondary btn-sm" data-open-file>选择 PDF</button>' +
     '</div>';
 
@@ -216,14 +272,16 @@
     S.recent = S.recent.filter(function (r) { return r.name !== doc.name; });
     S.recent.unshift({
       name: doc.name,
-      path: '本机文件 · 完整路径由浏览器保护',
+      path: desktopPath(doc.file),
       file: doc.file,
       pages: doc.pages.length,
       size: kb(doc.size),
       when: '刚刚',
-      demo: false
+      demo: false,
+      restored: false
     });
     S.recent = S.recent.slice(0, 6);
+    saveRecentStore();
     renderRecent();
   }
 
@@ -801,11 +859,19 @@
     }
   }
 
+  function blankSizeFor(at) {
+    var mode = ($('#blankSize') && $('#blankSize').value) || 'auto';
+    if (mode === 'a4') return { w: 595.28, h: 841.89 };
+    if (mode === 'letter') return { w: 612, h: 792 };
+    if (mode === 'current' && S.pages[S.current]) return ZJPages.blankDims(S.pages, S.current + 1);
+    return ZJPages.blankDims(S.pages, at);
+  }
+
   function insertBlank(pos) {
     if (blockWhileLoading()) return;
     if (!S.doc) { showToast('先打开一个 PDF', 'warn'); return; }
     var at = pos === 'start' ? 0 : pos === 'end' ? S.pages.length : S.current + 1;
-    var inserted = ZJPages.insertBlank(S.pages, at, ZJPages.blankDims(S.pages, at));
+    var inserted = ZJPages.insertBlank(S.pages, at, blankSizeFor(at));
     S.pages = inserted.pages;
     S.current = inserted.at; S.sel = [inserted.at];
     pushHistory(); buildThumbs(); renderMain(); updateSel(); updateNav();
@@ -1774,9 +1840,10 @@
       title: '清除最近文件记录？',
       desc: '列表会被清空，但不会删除任何原始 PDF 文件。此操作不可撤销。',
       icon: 'trash', confirmText: '清除记录',
-      bullets: ['将清除 ' + S.recent.length + ' 条记录', '只删除本次运行期间的文件名索引', '不会改动磁盘上的文件'],
+      bullets: ['将清除 ' + S.recent.length + ' 条记录', '只删除文件名与时间索引，不保存文件内容', '不会改动磁盘上的文件'],
       onConfirm: function () {
         S.recent = [];
+        saveRecentStore();
         renderRecent();
         syncSettings();
         showToast('已清除最近文件记录', 'ok');
@@ -2103,6 +2170,69 @@
       showToast('已移动页面到第 ' + (landed + 1) + ' 位', 'ok');
     });
 
+    /* 触屏与手写笔：HTML5 拖放在触屏上不会触发 dragstart，这里用 Pointer 事件补齐 */
+    var touchDrag = null;
+    function clearDropMarks() {
+      $$('.thumb, #mergeFiles .file-item').forEach(function (t) {
+        t.classList.remove('is-dragging', 'drop-before', 'drop-after');
+      });
+    }
+    $('#thumbList').addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' || e.button > 0) return;
+      if (e.target.closest('button')) return;
+      var t = e.target.closest('.thumb');
+      if (!t) return;
+      touchDrag = { kind: 'page', from: parseInt(t.dataset.idx, 10), target: -1 };
+      t.classList.add('is-dragging');
+    });
+    $('#mergeFiles').addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' || e.button > 0) return;
+      if (e.target.closest('button')) return;
+      var it = e.target.closest('[data-mfi]');
+      if (!it) return;
+      touchDrag = { kind: 'merge', from: parseInt(it.dataset.mfi, 10), target: -1 };
+      it.classList.add('is-dragging');
+    });
+    document.addEventListener('pointermove', function (e) {
+      if (!touchDrag) return;
+      var el = document.elementFromPoint(e.clientX, e.clientY);
+      if (!el || !el.closest) return;
+      var node = touchDrag.kind === 'page' ? el.closest('#thumbList .thumb') : el.closest('#mergeFiles [data-mfi]');
+      if (!node) return;
+      e.preventDefault();
+      var r = node.getBoundingClientRect();
+      var after = (e.clientY - r.top) > r.height / 2;
+      $$(touchDrag.kind === 'page' ? '.thumb' : '#mergeFiles .file-item').forEach(function (x) {
+        x.classList.remove('drop-before', 'drop-after');
+      });
+      node.classList.add(after ? 'drop-after' : 'drop-before');
+      touchDrag.target = parseInt(touchDrag.kind === 'page' ? node.dataset.idx : node.dataset.mfi, 10) + (after ? 1 : 0);
+    }, { passive: false });
+    function endTouchDrag() {
+      if (!touchDrag) return;
+      var drag = touchDrag;
+      touchDrag = null;
+      clearDropMarks();
+      if (drag.target < 0 || drag.target === drag.from || drag.target === drag.from + 1) return;
+      if (drag.kind === 'page') {
+        if (blockWhileLoading()) return;
+        var landed = drag.from < drag.target ? drag.target - 1 : drag.target;
+        S.pages = ZJPages.move(S.pages, drag.from, drag.target);
+        S.sel = [landed]; S.current = landed;
+        pushHistory(); buildThumbs(); renderMain(); updateSel(); updateNav();
+        showToast('已移动页面到第 ' + (landed + 1) + ' 位', 'ok');
+      } else {
+        var insertAt = drag.from < drag.target ? drag.target - 1 : drag.target;
+        var item = S.mergeFiles.splice(drag.from, 1)[0];
+        S.mergeFiles.splice(insertAt, 0, item);
+        markDirty(true);
+        renderMergeList(); renderMergePreview();
+        showToast('已调整合并顺序', 'ok');
+      }
+    }
+    document.addEventListener('pointerup', endTouchDrag);
+    document.addEventListener('pointercancel', endTouchDrag);
+
     /* 键盘 */
     document.addEventListener('keydown', function (e) {
       var tag = (e.target.tagName || '').toLowerCase();
@@ -2412,7 +2542,13 @@
     /* 设置 */
     $('#setRecent').addEventListener('change', function () {
       S.recentOn = this.checked;
-      showToast(this.checked ? '已开启本次运行期间的文件名记录' : '已停止记录最近文件', 'info');
+      saveRecentOn();
+      if (!S.recentOn) {
+        S.recent = [];
+        saveRecentStore();
+        renderRecent();
+      }
+      showToast(this.checked ? '已开启最近文件记录（只保存在本机）' : '已停止记录最近文件', 'info');
     });
 
     /* 演示控制 */
@@ -2445,6 +2581,16 @@
     if (!r) return;
     if (r.file) { openLocalPdf(r.file); return; }
     if (r.demo) { openDemo(); return; }
+    if (r.path && window.zjDesktop && typeof window.zjDesktop.readFile === 'function') {
+      window.zjDesktop.readFile(r.path).then(function (res) {
+        if (!res || !res.ok) {
+          showToast('无法读取这个文件，可能已被移动或删除', 'err');
+          return;
+        }
+        openLocalPdf(new File([res.bytes], res.name || r.name, { type: 'application/pdf' }));
+      });
+      return;
+    }
     openDialog({
       title: '需要重新选择这个文件',
       desc: '浏览器仅在当前运行期间保留所选文件引用。请重新选择该文件继续处理。',
@@ -2461,6 +2607,8 @@
      22. 初始化
      ============================================================ */
   function init() {
+    S.recent = loadRecentStore();
+    S.recentOn = loadRecentOn();
     renderHome();
     renderMergeList();
     renderMergePreview();

@@ -37,6 +37,8 @@ node scripts/make-icon.mjs  # 重新生成 desktop/icon.ico
 - 渲染进程的 `window.close()` 在 Electron 33 里直接销毁窗口，**不会**触发 `BrowserWindow` 的 `close` 事件；
   测试关窗拦截要用 `app.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows()[0].close())`。
 - 未保存状态由渲染进程通过 `zj:dirty` IPC 同步，主进程只保存一个布尔值；`did-finish-load` 时复位。
+- 最近文件写入 `localStorage`（`zj.recent.v1`），只存元数据；桌面版用 `webUtils.getPathForFile` + `zj:read-file` 支持按路径重开。
+- 触屏拖动走 Pointer 事件（`pointerType !== 'mouse'`），鼠标仍走 HTML5 拖放，两条路径不要同时提交移动。
 - 缩略图用 `IntersectionObserver` 按可视区域绘制，离开视野时把 canvas 宽高清零但保留 CSS 尺寸，
   否则列表会因布局跳动导致拖动命中区域错位。
 

@@ -532,6 +532,15 @@
                       </select>
                       <button class="btn btn-secondary btn-sm" id="btnInsertBlank">插入</button>
                     </div>
+                    <div class="row-inline">
+                      <select class="select" id="blankSize" style="flex:1" aria-label="空白页尺寸">
+                        <option value="auto">尺寸跟随相邻页（默认）</option>
+                        <option value="current">与当前页一致</option>
+                        <option value="a4">A4（595 × 842 pt）</option>
+                        <option value="letter">Letter（612 × 792 pt）</option>
+                      </select>
+                    </div>
+                    <p class="field-hint">空白页默认取相邻页的显示尺寸；横向页或自定义尺寸文档可以改用 A4 / Letter。</p>
                   </div>
 
                   <div class="group">
@@ -1423,7 +1432,7 @@
               <div class="set-row">
                 <div class="sr-main">
                   <div class="sr-title">保存最近文件记录</div>
-                  <div class="sr-desc">仅在当前运行期间保留文件名；浏览器不开放完整路径，关闭页面后记录清除。</div>
+                  <div class="sr-desc">记录保存在本机（浏览器本地存储 / 桌面版用户数据目录），只含文件名、页数、大小和时间；桌面版另外保存路径用于重新打开，不保存文件内容。</div>
                 </div>
                 <div class="sr-side">
                   <label class="switch"><input type="checkbox" id="setRecent" checked><span class="switch-track"></span></label>

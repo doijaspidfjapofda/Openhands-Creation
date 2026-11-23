@@ -41,14 +41,76 @@
     return out;
   }
 
-  function formatTextContent(items) {
+  function tidy(text) {
+    return text.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  function flowText(items) {
     var text = '';
     (items || []).forEach(function (item) {
       if (typeof item.str !== 'string') return;
       text += item.str;
       if (item.hasEOL) text += '\n';
     });
-    return text.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    return text;
+  }
+
+  function groupLines(entries) {
+    var sorted = entries.slice().sort(function (a, b) { return b.y - a.y || a.x - b.x; });
+    var lines = [];
+    sorted.forEach(function (e) {
+      var line = lines[lines.length - 1];
+      if (line && Math.abs(line.y - e.y) <= 3) line.items.push(e);
+      else lines.push({ y: e.y, items: [e] });
+    });
+    lines.forEach(function (line) {
+      line.items.sort(function (a, b) { return a.x - b.x; });
+    });
+    return lines;
+  }
+
+  function linesText(lines) {
+    return lines.map(function (line) {
+      return line.items.map(function (item) { return item.str; }).join('');
+    }).filter(function (t) { return t.trim(); }).join('\n');
+  }
+
+  /* 两栏排版的内容流常常是左右交错的，这里按列切分后逐栏输出 */
+  function columnCut(entries) {
+    var xs = entries.map(function (e) { return e.x; }).sort(function (a, b) { return a - b; });
+    var span = xs[xs.length - 1] - xs[0];
+    if (span < 60) return 0;
+    var best = 0;
+    var cut = 0;
+    for (var i = 1; i < xs.length; i++) {
+      var gap = xs[i] - xs[i - 1];
+      if (gap > best) { best = gap; cut = (xs[i] + xs[i - 1]) / 2; }
+    }
+    if (best < span * 0.18) return 0;
+    var left = entries.filter(function (e) { return e.x < cut; });
+    var right = entries.filter(function (e) { return e.x >= cut; });
+    if (left.length < 4 || right.length < 4) return 0;
+    if (Math.min(left.length, right.length) / entries.length < 0.25) return 0;
+    if (groupLines(left).length < 2 || groupLines(right).length < 2) return 0;
+    return cut;
+  }
+
+  function formatTextContent(items) {
+    var entries = [];
+    var hasCoords = false;
+    (items || []).forEach(function (item) {
+      if (typeof item.str !== 'string') return;
+      var tr = item.transform;
+      if (tr && tr.length >= 6) hasCoords = true;
+      entries.push({ str: item.str, x: tr ? Number(tr[4]) || 0 : 0, y: tr ? Number(tr[5]) || 0 : 0 });
+    });
+    if (!hasCoords) return tidy(flowText(items));
+    var cut = columnCut(entries);
+    if (cut) {
+      return tidy(linesText(groupLines(entries.filter(function (e) { return e.x < cut; }))) +
+        '\n\n' + linesText(groupLines(entries.filter(function (e) { return e.x >= cut; }))));
+    }
+    return tidy(linesText(groupLines(entries)));
   }
 
   /* PDF → 纯文本。doc 为 pdf.js 文档对象，items 指定要导出的页面 */

@@ -1,4 +1,4 @@
-import { app, makePdf, fileOf, inspect, createRunner, assert, assertEqual } from './harness.mjs';
+import { app, makePdf, fileOf, inspect, createRunner, assert, assertEqual, PDFLib } from './harness.mjs';
 
 const { engine, pages: ZJPages } = app;
 const { test, done } = createRunner();
@@ -164,6 +164,20 @@ await test('页码模型越界时报错而不是生成错误页面', async () =>
   let err = null;
   try { await engine.createFromPages(file, [{ id: 'x', index: 99, rot: 0, blank: false }]); } catch (e) { err = e; }
   assert(err && err.code === 'pagerange', '应返回 pagerange 错误');
+});
+
+await test('BUG-07 裁剪框（CropBox）在整理导出后保留', async () => {
+  const src = await PDFLib.PDFDocument.load(await makePdf([{ text: 'CROP-1' }]));
+  src.getPage(0).setCropBox(40, 60, 300, 400);
+  const cropped = fileOf(await src.save(), 'crop.pdf');
+  const out = await engine.createFromPages(cropped, [{ id: 'p0', index: 0, rot: 0, blank: false, w: 595.28, h: 841.89 }]);
+  const doc = await PDFLib.PDFDocument.load(out);
+  const box = doc.getPage(0).getCropBox();
+  assertEqual(
+    [Math.round(box.x), Math.round(box.y), Math.round(box.width), Math.round(box.height)],
+    [40, 60, 300, 400],
+    '导出页的裁剪框'
+  );
 });
 
 done('页面整理测试');

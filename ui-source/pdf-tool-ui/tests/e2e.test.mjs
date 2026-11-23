@@ -59,10 +59,11 @@ page.on('pageerror', (err) => pageErrors.push(err.message));
 
 await page.goto(baseUrl, { waitUntil: 'load' });
 
-async function waitUntil(fn, timeout = 30000) {
+async function waitUntil(fn, arg, timeout = 30000) {
+  if (typeof arg === 'number' && timeout === 30000) { timeout = arg; arg = undefined; }
   const start = Date.now();
   while (Date.now() - start < timeout) {
-    if (await page.evaluate(fn)) return;
+    if (await page.evaluate(fn, arg)) return;
     await new Promise((r) => setTimeout(r, 100));
   }
   throw new Error('等待页面条件超时');
@@ -244,6 +245,100 @@ await test('BUG-04 合并顺序不可撤销的说明可见，下移按钮可用'
   await page.click('#mergeFiles .file-item[data-mfi="1"] [data-mfdel]');
   await page.click('#mergeFiles .file-item[data-mfi="0"] [data-mfdel]');
   await waitUntil(() => document.querySelectorAll('#mergeFiles .file-item').length === 0);
+});
+
+const LETTER = await makePdf([{ text: 'L-1', w: 612, h: 792 }, { text: 'L-2', w: 612, h: 792 }]);
+
+async function reopenSample(name = 'e2e-sample.pdf') {
+  await page.setInputFiles('#fileInput', { name: name, mimeType: 'application/pdf', buffer: Buffer.from(SRC) });
+  await waitUntil((target) => {
+    const ws = document.querySelector('#wsFileName');
+    const st = document.querySelector('#sbStatus');
+    return !!ws && ws.textContent === target
+      && document.querySelectorAll('#thumbList .thumb').length === 4
+      && !!st && /就绪/.test(st.textContent);
+  }, name, 60000);
+}
+
+await test('BUG-09 空白页尺寸可选：默认跟随相邻页，也可指定 A4', async () => {
+  await page.click('.nav-item[data-tool="organize"]');
+  await page.waitForSelector('[data-panel="organize"]:not([hidden])');
+  await page.setInputFiles('#fileInput', { name: 'letter.pdf', mimeType: 'application/pdf', buffer: Buffer.from(LETTER) });
+  await waitUntil(() => document.querySelector('#wsFileName').textContent === 'letter.pdf'
+    && document.querySelectorAll('#thumbList .thumb').length === 2
+    && /就绪/.test(document.querySelector('#sbStatus').textContent));
+
+  await page.selectOption('#blankPos', 'end');
+  await page.selectOption('#blankSize', 'auto');
+  await page.click('#btnInsertBlank');
+  await page.waitForTimeout(150);
+  await page.selectOption('#blankSize', 'a4');
+  await page.click('#btnInsertBlank');
+  await page.waitForTimeout(150);
+
+  const saved = await saveDownload(async () => {
+    await page.click('[data-run="organize"]');
+    await page.waitForSelector('[data-dlg-ok]');
+    await page.click('[data-dlg-ok]');
+  });
+  const info = await inspect(saved.bytes);
+  assertEqual(info.pageCount, 4, '导出页数');
+  assertEqual([Math.round(info.pages[2].width), Math.round(info.pages[2].height)], [612, 792], '默认空白页跟随相邻页');
+  assertEqual([Math.round(info.pages[3].width), Math.round(info.pages[3].height)], [595, 842], '指定 A4 的空白页');
+  await reopenSample();
+});
+
+await test('BUG-10 触屏 / 手写笔指针拖动也能排序', async () => {
+  await page.click('.nav-item[data-tool="organize"]');
+  await page.waitForSelector('[data-panel="organize"]:not([hidden])');
+  await reopenSample('touch.pdf');
+  await page.locator('#thumbList .thumb[data-idx="2"]').scrollIntoViewIfNeeded();
+
+  await page.evaluate(() => {
+    const a = document.querySelector('#thumbList .thumb[data-idx="0"]');
+    const b = document.querySelector('#thumbList .thumb[data-idx="2"]');
+    const ra = a.getBoundingClientRect();
+    const rb = b.getBoundingClientRect();
+    const ev = (type, x, y) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, pointerId: 7, pointerType: 'touch', isPrimary: true, clientX: x, clientY: y
+    });
+    a.dispatchEvent(ev('pointerdown', ra.x + 20, ra.y + 20));
+    document.dispatchEvent(ev('pointermove', rb.x + 20, rb.y + rb.height - 6));
+    document.dispatchEvent(ev('pointerup', rb.x + 20, rb.y + rb.height - 6));
+  });
+  await waitUntil(() => /已移动页面到第 3 位/.test(document.querySelector('#toastStack').textContent || ''));
+
+  const saved = await saveDownload(async () => {
+    await page.click('[data-run="organize"]');
+    await page.waitForSelector('[data-dlg-ok]');
+    await page.click('[data-dlg-ok]');
+  });
+  const info = await inspect(saved.bytes);
+  assertEqual(info.pages.map((p) => p.text), ['E2E-PAGE-2', 'E2E-PAGE-3', 'E2E-PAGE-1', 'E2E-PAGE-4'], '指针拖动后的页序');
+  await reopenSample();
+});
+
+await test('BUG-06 最近文件记录刷新后仍保留，且不含文件内容', async () => {
+  await page.setInputFiles('#fileInput', { name: 'persist.pdf', mimeType: 'application/pdf', buffer: Buffer.from(SRC) });
+  await waitUntil(() => document.querySelector('#wsFileName').textContent === 'persist.pdf'
+    && /就绪/.test(document.querySelector('#sbStatus').textContent));
+
+  const stored = await page.evaluate(() => localStorage.getItem('zj.recent.v1'));
+  assert(stored && /persist\.pdf/.test(stored), '应把文件名写入本机记录：' + stored);
+  assert(!/E2E-PAGE/.test(stored), '记录不应包含文件内容');
+  assert(!/base64|data:application/.test(stored), '记录不应包含文件数据');
+
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForSelector('#recentCard .rec-row');
+  const names = await page.evaluate(() => Array.from(document.querySelectorAll('#recentCard .rec-name')).map((n) => n.textContent));
+  assert(names.includes('persist.pdf'), '刷新后应看到最近记录：' + JSON.stringify(names));
+
+  await page.locator('#recentCard .rec-row', { hasText: 'persist.pdf' }).first().click();
+  await page.waitForSelector('[data-dlg-ok]', { timeout: 5000 });
+  const dlgText = await page.evaluate(() => document.querySelector('[data-dlg-ok]').closest('div').parentElement.textContent);
+  assert(/重新选择/.test(dlgText), '浏览器版应提示重新选择文件');
+  await page.click('[data-dlg-cancel]');
+  await reopenSample();
 });
 
 await test('拆分：按页码范围生成 ZIP，解压后页数正确', async () => {

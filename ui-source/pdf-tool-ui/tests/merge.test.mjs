@@ -95,4 +95,21 @@ await test('进度回调返回 false 时中止且不返回结果', async () => {
   assert(err && err.name === 'AbortError', '应以 AbortError 中止');
 });
 
+await test('BUG-07 合并后保留每个文件的裁剪框', async () => {
+  const a = await PDFLib.PDFDocument.load(await makePdf([{ text: 'CA' }]));
+  a.getPage(0).setCropBox(30, 30, 200, 300);
+  const b = await PDFLib.PDFDocument.load(await makePdf([{ text: 'CB' }]));
+  const out = await engine.merge([
+    { file: fileOf(await a.save(), 'ca.pdf') },
+    { file: fileOf(await b.save(), 'cb.pdf') }
+  ], false);
+  const doc = await PDFLib.PDFDocument.load(out);
+  const box = doc.getPage(0).getCropBox();
+  assertEqual(
+    [Math.round(box.x), Math.round(box.y), Math.round(box.width), Math.round(box.height)],
+    [30, 30, 200, 300],
+    '第 1 页裁剪框'
+  );
+});
+
 done('合并测试');

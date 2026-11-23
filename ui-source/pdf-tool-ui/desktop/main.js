@@ -114,6 +114,18 @@ ipcMain.on('zj:dirty', (event, dirty) => {
   if (mainWindow && event.sender === mainWindow.webContents) hasUnsavedChanges = !!dirty;
 });
 
+/* 最近文件按路径重新打开：只读本机文件，不联网 */
+ipcMain.handle('zj:read-file', async (event, filePath) => {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return { ok: false, error: 'denied' };
+  if (typeof filePath !== 'string' || !filePath.trim()) return { ok: false, error: 'invalid' };
+  try {
+    const bytes = await fs.promises.readFile(filePath);
+    return { ok: true, name: path.basename(filePath), bytes: new Uint8Array(bytes) };
+  } catch (err) {
+    return { ok: false, error: String((err && err.code) || err) };
+  }
+});
+
 ipcMain.handle('zj:save-file', async (event, payload) => {
   const name = String((payload && payload.name) || '输出.pdf');
   const bytes = payload && payload.bytes;

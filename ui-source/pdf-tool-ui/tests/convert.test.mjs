@@ -1,4 +1,4 @@
-import { app, makePdf, makePng, TINY_JPEG, fileOf, inspect, openPdfjs, createRunner, assert, assertEqual } from './harness.mjs';
+import { app, makePdf, makePng, TINY_JPEG, fileOf, inspect, openPdfjs, createRunner, assert, assertEqual, PDFLib } from './harness.mjs';
 
 const { convert: ZJConvert } = app;
 const { test, done } = createRunner();
@@ -98,6 +98,42 @@ await test('PDF 转文本：没有文档时给出明确错误', async () => {
   let err = null;
   try { await ZJConvert.pdfToText(null, {}); } catch (e) { err = e; }
   assert(err && err.code === 'nodoc', '应返回 nodoc 错误');
+});
+
+async function pageItems(spec, draw) {
+  const { PDFDocument, StandardFonts } = PDFLib;
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const page = doc.addPage([595, 842]);
+  draw(page, font);
+  const pdf = await openPdfjs(await doc.save());
+  const tc = await (await pdf.getPage(1)).getTextContent();
+  return tc.items;
+}
+
+await test('BUG-08 两栏排版按列输出，不左右交错', async () => {
+  const items = await pageItems(null, (page, font) => {
+    let y = 760;
+    for (let i = 1; i <= 4; i++) {
+      page.drawText('LEFT-' + i, { x: 50, y, size: 12, font });
+      page.drawText('RIGHT-' + i, { x: 330, y, size: 12, font });
+      y -= 22;
+    }
+  });
+  const text = ZJConvert.formatTextContent(items);
+  const columns = text.split(/\n{2,}/);
+  assertEqual(columns.length, 2, '应分成两栏：' + JSON.stringify(text));
+  assertEqual(columns[0].split('\n').map((l) => l.trim()), ['LEFT-1', 'LEFT-2', 'LEFT-3', 'LEFT-4'], '左栏顺序');
+  assertEqual(columns[1].split('\n').map((l) => l.trim()), ['RIGHT-1', 'RIGHT-2', 'RIGHT-3', 'RIGHT-4'], '右栏顺序');
+});
+
+await test('BUG-08 单栏排版按行输出，不误判为多栏', async () => {
+  const items = await pageItems(null, (page, font) => {
+    page.drawText('ONLY-1', { x: 50, y: 700, size: 12, font });
+    page.drawText('ONLY-2', { x: 50, y: 680, size: 12, font });
+    page.drawText('ONLY-3', { x: 50, y: 660, size: 12, font });
+  });
+  assertEqual(ZJConvert.formatTextContent(items), 'ONLY-1\nONLY-2\nONLY-3', '单栏顺序');
 });
 
 await test('文本整理会合并多余空行', async () => {
