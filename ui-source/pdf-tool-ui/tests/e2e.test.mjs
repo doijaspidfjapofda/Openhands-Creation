@@ -163,6 +163,89 @@ await test('拖动缩略图排序后导出顺序随之改变', async () => {
     && /就绪/.test(document.querySelector('#sbStatus').textContent));
 });
 
+const BIG = await makePdf(Array.from({ length: 120 }, (_, i) => ({ text: 'BIG-' + (i + 1) })));
+
+await test('BUG-05 大文档打开时显示已读取页数', async () => {
+  await page.evaluate(() => {
+    window.__statusLog = [];
+    const el = document.querySelector('#sbStatus');
+    new MutationObserver(() => window.__statusLog.push(el.textContent)).observe(el, { childList: true, subtree: true, characterData: true });
+  });
+  await page.setInputFiles('#fileInput', { name: 'big.pdf', mimeType: 'application/pdf', buffer: Buffer.from(BIG) });
+  await waitUntil(() => document.querySelector('#wsFileName').textContent === 'big.pdf'
+    && /就绪/.test(document.querySelector('#sbStatus').textContent), 90000);
+  const log = await page.evaluate(() => window.__statusLog);
+  assert(log.some((t) => /\/ 120 页/.test(t)), '状态栏应显示读取进度，实际记录：' + JSON.stringify(log.slice(0, 6)));
+});
+
+await test('BUG-02 大文档：全部页面都有缩略图，可把第 100 页移到第 1 位', async () => {
+  const count = await page.evaluate(() => document.querySelectorAll('#thumbList .thumb').length);
+  assertEqual(count, 120, '缩略图数量（不应再截断到 80）');
+  const listText = await page.evaluate(() => document.querySelector('#thumbList').textContent);
+  assert(!/仅显示前/.test(listText), '不应再出现截断提示');
+
+  await page.locator('#thumbList .thumb[data-idx="99"]').scrollIntoViewIfNeeded();
+  await page.click('#thumbList .thumb[data-idx="99"]');
+  await page.fill('#moveToPage', '1');
+  await page.click('[data-pageact="move"]');
+  await waitUntil(() => /已移动页面到第 1 位/.test(document.querySelector('#toastStack').textContent || ''));
+
+  const saved = await saveDownload(async () => {
+    await page.click('[data-run="organize"]');
+    await page.waitForSelector('[data-dlg-ok]');
+    await page.click('[data-dlg-ok]');
+  });
+  const info = await inspect(saved.bytes);
+  assertEqual(info.pageCount, 120, '导出页数');
+  assertEqual(info.pages[0].text, 'BIG-100', '第 1 页应是被移动的页');
+  assertEqual(info.pages[1].text, 'BIG-1', '原第 1 页顺延到第 2 位');
+});
+
+await test('BUG-03 不用拖拽也能排序：上移 / 下移 / 移到指定页与快捷键', async () => {
+  await page.setInputFiles('#fileInput', { name: 'e2e-sample.pdf', mimeType: 'application/pdf', buffer: Buffer.from(SRC) });
+  await waitUntil(() => document.querySelector('#wsFileName').textContent === 'e2e-sample.pdf'
+    && document.querySelectorAll('#thumbList .thumb').length === 4
+    && /就绪/.test(document.querySelector('#sbStatus').textContent));
+
+  await page.click('#thumbList .thumb[data-idx="2"]');
+  await page.click('[data-pageact="up"]');
+  await page.click('[data-pageact="up"]');
+  await page.keyboard.press('Alt+ArrowDown');
+  await waitUntil(() => /已移动页面到第 2 位/.test(document.querySelector('#toastStack').textContent || ''));
+
+  const saved = await saveDownload(async () => {
+    await page.click('[data-run="organize"]');
+    await page.waitForSelector('[data-dlg-ok]');
+    await page.click('[data-dlg-ok]');
+  });
+  const info = await inspect(saved.bytes);
+  assertEqual(info.pages.map((p) => p.text), ['E2E-PAGE-1', 'E2E-PAGE-3', 'E2E-PAGE-2', 'E2E-PAGE-4'], '按钮与快捷键排序结果');
+
+  await page.setInputFiles('#fileInput', { name: 'e2e-sample.pdf', mimeType: 'application/pdf', buffer: Buffer.from(SRC) });
+  await waitUntil(() => document.querySelector('#wsFileName').textContent === 'e2e-sample.pdf'
+    && document.querySelectorAll('#thumbList .thumb').length === 4
+    && /就绪/.test(document.querySelector('#sbStatus').textContent));
+});
+
+await test('BUG-04 合并顺序不可撤销的说明可见，下移按钮可用', async () => {
+  await page.click('.nav-item[data-tool="merge"]');
+  await page.waitForSelector('[data-panel="merge"]:not([hidden])');
+  const hint = await page.textContent('#mergeOrderHint');
+  assert(/不支持撤销/.test(hint), '合并面板应说明顺序不可撤销：' + hint);
+  await page.setInputFiles('#fileInput', [
+    { name: 'ma.pdf', mimeType: 'application/pdf', buffer: Buffer.from(MERGE_A) },
+    { name: 'mb.pdf', mimeType: 'application/pdf', buffer: Buffer.from(MERGE_B) }
+  ]);
+  await waitUntil(() => document.querySelectorAll('#mergeFiles .file-item').length === 2);
+  await page.click('#mergeFiles .file-item[data-mfi="0"] [data-mfdown]');
+  const names = await page.evaluate(() => Array.from(document.querySelectorAll('#mergeFiles .fi-name')).map((n) => n.textContent));
+  assertEqual(names, ['mb.pdf', 'ma.pdf'], '下移后的列表顺序');
+  await page.click('#mergeFiles .file-item[data-mfi="0"] [data-mfup]');
+  await page.click('#mergeFiles .file-item[data-mfi="1"] [data-mfdel]');
+  await page.click('#mergeFiles .file-item[data-mfi="0"] [data-mfdel]');
+  await waitUntil(() => document.querySelectorAll('#mergeFiles .file-item').length === 0);
+});
+
 await test('拆分：按页码范围生成 ZIP，解压后页数正确', async () => {
   await page.click('.nav-item[data-tool="split"]');
   await page.waitForSelector('[data-panel="split"]:not([hidden])');

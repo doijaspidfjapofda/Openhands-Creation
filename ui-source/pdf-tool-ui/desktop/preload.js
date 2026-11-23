@@ -5,5 +5,12 @@ contextBridge.exposeInMainWorld('zjDesktop', {
   isDesktop: true,
   saveFile: function (name, bytes) {
     return ipcRenderer.invoke('zj:save-file', { name: name, bytes: bytes });
+  },
+  setDirty: function (dirty) {
+    ipcRenderer.send('zj:dirty', !!dirty);
+  },
+  onSaveRequest: function (handler) {
+    if (typeof handler !== 'function') return;
+    ipcRenderer.on('zj:save-request', function () { handler(); });
   }
 });

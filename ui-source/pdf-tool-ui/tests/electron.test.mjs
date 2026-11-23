@@ -186,6 +186,49 @@ await test('运行期间没有外部请求或脚本错误', async () => {
   assertEqual(pageErrors, [], '页面脚本错误');
 });
 
-await app.close();
+async function windowCount() {
+  try { return app.windows().length; } catch (e) { return 0; }
+}
+
+await test('BUG-01 有未保存改动时关窗先确认，取消则不关闭', async () => {
+  await page.click('.nav-item[data-tool="organize"]');
+  await page.waitForSelector('[data-panel="organize"]:not([hidden])');
+  await page.click('[data-pageact="rotate-r"]');
+  await page.waitForTimeout(300);
+
+  /* 只替换系统确认框，拦截逻辑仍走应用自身的 close 事件处理 */
+  await app.evaluate(({ dialog }) => {
+    globalThis.__closePrompts = 0;
+    dialog.showMessageBox = async () => { globalThis.__closePrompts += 1; return { response: 2, checkboxChecked: false }; };
+  });
+  await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());
+  await page.waitForTimeout(700);
+  assertEqual(await windowCount(), 1, '选择“取消”后窗口应保留');
+  assertEqual(await page.evaluate(() => 1 + 1), 2, '页面仍应可访问');
+  assertEqual(await app.evaluate(() => globalThis.__closePrompts), 1, '应弹出一次未保存确认');
+
+  /* 选择“去保存”应把用户带到保存流程，而不是直接关窗 */
+  await app.evaluate(({ dialog }) => {
+    dialog.showMessageBox = async () => ({ response: 0, checkboxChecked: false });
+  });
+  await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());
+  await page.waitForSelector('[data-dlg-ok]', { timeout: 5000 });
+  assertEqual(await windowCount(), 1, '选择“去保存”后窗口应保留');
+  await page.click('[data-dlg-cancel]');
+  await page.waitForTimeout(200);
+
+  await app.evaluate(({ dialog }) => {
+    dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false });
+  });
+  await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());
+  let closed = false;
+  for (let i = 0; i < 40 && !closed; i++) {
+    await new Promise((r) => setTimeout(r, 150));
+    closed = (await windowCount()) === 0;
+  }
+  assert(closed, '选择“放弃改动并关闭”后窗口应关闭');
+});
+
+await app.close().catch(() => {});
 await fs.rm(downloadDir, { recursive: true, force: true });
 done('桌面应用测试');

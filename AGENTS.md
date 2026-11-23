@@ -32,6 +32,14 @@ node scripts/make-icon.mjs  # 重新生成 desktop/icon.ico
 - 缺陷与改进清单在仓库根目录 `PRD-改进与缺陷清单.md`。未确认前不要改代码；确认后按条目逐条实施，
   每条先补复现测试，改完更新该文件状态列并跑满 92 项回归。
 
+## 桌面与界面经验
+
+- 渲染进程的 `window.close()` 在 Electron 33 里直接销毁窗口，**不会**触发 `BrowserWindow` 的 `close` 事件；
+  测试关窗拦截要用 `app.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows()[0].close())`。
+- 未保存状态由渲染进程通过 `zj:dirty` IPC 同步，主进程只保存一个布尔值；`did-finish-load` 时复位。
+- 缩略图用 `IntersectionObserver` 按可视区域绘制，离开视野时把 canvas 宽高清零但保留 CSS 尺寸，
+  否则列表会因布局跳动导致拖动命中区域错位。
+
 ## 环境注意
 
 - 页面带严格 CSP，Playwright 的 `page.waitForFunction` 会被 CSP 拒绝；测试里用 `waitUntil()` 轮询 `page.evaluate`。

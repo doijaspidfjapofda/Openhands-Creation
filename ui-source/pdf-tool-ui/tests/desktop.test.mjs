@@ -38,7 +38,10 @@ class FakeBrowserWindow {
 
 const fakeElectron = {
   app: fakeApp,
-  ipcMain: { handle: (channel, fn) => { handlers['ipc:' + channel] = fn; } },
+  ipcMain: {
+    handle: (channel, fn) => { handlers['ipc:' + channel] = fn; },
+    on: (channel, fn) => { handlers['ipc:' + channel] = fn; }
+  },
   BrowserWindow: FakeBrowserWindow,
   Menu: { buildFromTemplate: (t) => t, setApplicationMenu: () => {} },
   shell: { openExternal: () => {} },

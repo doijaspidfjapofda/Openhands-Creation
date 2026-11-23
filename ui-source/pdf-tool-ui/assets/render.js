@@ -478,7 +478,16 @@
     };
   }
 
-  function loadPdf(file) {
+  function loadPdf(file, opts) {
+    opts = opts || {};
+    var report = function (done, total) {
+      if (typeof opts.onProgress === 'function') {
+        try { opts.onProgress(done, total); } catch (e) {}
+      }
+    };
+    var aborted = function () {
+      return typeof opts.shouldAbort === 'function' && opts.shouldAbort();
+    };
     return new Promise(function (resolve, reject) {
       if (!pdfReady || !global.pdfjsLib) {
         reject({ code: 'nopdfjs', message: '本机 pdf.js 未加载' });
@@ -494,19 +503,24 @@
           pdf.getMetadata().then(function (m) { meta = (m && m.info) || {}; }).catch(function () {});
           var sizes = [];
           var seq = Promise.resolve();
+          report(0, pdf.numPages);
           for (var i = 1; i <= pdf.numPages; i++) {
             (function (n) {
               seq = seq.then(function () {
+                if (aborted()) throw { code: 'cancelled', message: '已取消读取' };
                 return pdf.getPage(n).then(function (page) {
                   var vp = page.getViewport({ scale: 1 });
                   sizes[n - 1] = { w: vp.width, h: vp.height };
                 }).catch(function () {
                   sizes[n - 1] = { w: A4.w, h: A4.h };
+                }).then(function () {
+                  report(n, pdf.numPages);
                 });
               });
             })(i);
           }
           seq.then(function () {
+            if (aborted()) throw { code: 'cancelled', message: '已取消读取' };
             resolve({
               kind: 'pdf',
               pdf: pdf,
@@ -519,6 +533,7 @@
             });
           });
         }).catch(function (err) {
+          if (err && err.code === 'cancelled') { reject(err); return; }
           var name = (err && err.name) || '';
           if (name === 'PasswordException') {
             reject({ code: err.code === 2 ? 'bad-password' : 'need-password', message: '该文件已加密，需要打开密码' });

@@ -9,6 +9,8 @@ const APP_ROOT = path.join(__dirname, '..');
 let mainWindow = null;
 let localServer = null;
 let localPort = 0;
+let hasUnsavedChanges = false;
+let closeConfirmed = false;
 
 function isLocalUrl(url) {
   return typeof url === 'string' && url.startsWith('http://127.0.0.1:' + localPort + '/');
@@ -70,6 +72,32 @@ async function createWindow() {
     if (!isLocalUrl(url)) event.preventDefault();
   });
 
+  mainWindow.webContents.on('did-finish-load', () => { hasUnsavedChanges = false; closeConfirmed = false; });
+
+  /* 页面有未保存改动时先确认，避免整理结果被静默丢弃 */
+  mainWindow.on('close', async (event) => {
+    if (!hasUnsavedChanges || closeConfirmed) return;
+    event.preventDefault();
+    const { response } = await dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      title: '还有未保存的改动',
+      message: '当前页面调整还没有保存。',
+      detail: '直接关闭会丢失这些改动，原文件不会被修改。',
+      buttons: ['去保存', '放弃改动并关闭', '取消'],
+      defaultId: 0,
+      cancelId: 2,
+      noLink: true
+    });
+    if (response === 1) {
+      closeConfirmed = true;
+      mainWindow.close();
+    } else if (response === 0) {
+      mainWindow.show();
+      mainWindow.focus();
+      mainWindow.webContents.send('zj:save-request');
+    }
+  });
+
   mainWindow.on('closed', () => { mainWindow = null; });
   await mainWindow.loadURL(started.url);
 }
@@ -81,6 +109,10 @@ const SAVE_FILTERS = {
   '.png': [{ name: 'PNG 图片', extensions: ['png'] }],
   '.jpg': [{ name: 'JPEG 图片', extensions: ['jpg', 'jpeg'] }]
 };
+
+ipcMain.on('zj:dirty', (event, dirty) => {
+  if (mainWindow && event.sender === mainWindow.webContents) hasUnsavedChanges = !!dirty;
+});
 
 ipcMain.handle('zj:save-file', async (event, payload) => {
   const name = String((payload && payload.name) || '输出.pdf');

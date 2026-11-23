@@ -96,6 +96,8 @@
 
   var runToken = 0;
   var pdfHintShown = false;
+  var loadCancelled = false;
+  var dirty = false;
 
   /* ============================================================
      3. 视图路由
@@ -261,6 +263,7 @@
           return ZJEngine.pageCount(f).then(function (pages) {
             S.mergeFiles.push({ name: f.name, pages: pages, size: f.size || 0, file: f });
             added++;
+            markDirty(true);
             renderMergeList(); renderMergePreview(); updateStatus();
           }).catch(function (err) {
             showToast((f.name || '文件') + '：' + friendlyError(err), 'warn');
@@ -290,16 +293,39 @@
 
   function openLocalPdf(file) {
     S.loading = true;
+    loadCancelled = false;
     setLoading(true);
-    return ZJRender.loadPdf(file).then(function (doc) {
+    return ZJRender.loadPdf(file, {
+      onProgress: function (done, total) {
+        setStatus('loading', done ? '正在读取文件… ' + done + ' / ' + total + ' 页' : '正在读取文件… 共 ' + total + ' 页');
+      },
+      shouldAbort: function () { return loadCancelled; }
+    }).then(function (doc) {
       activateDoc(doc);
       showToast('已在本机打开：' + doc.name, 'ok');
     }).catch(function (err) {
+      if (err && err.code === 'cancelled') {
+        showToast('已取消读取，原文件没有被修改', 'info');
+        return;
+      }
       return handleOpenError(err, file);
     }).then(function () {
       S.loading = false;
       setStatus('ready', '就绪');
     });
+  }
+
+  /* 有未保存改动时关窗要确认：桌面版走主进程对话框，浏览器版走 beforeunload */
+  function markDirty(on) {
+    dirty = !!on;
+    if (window.zjDesktop && typeof window.zjDesktop.setDirty === 'function') {
+      window.zjDesktop.setDirty(dirty);
+    }
+  }
+
+  function requestSave() {
+    if (S.loading) { showToast('文件正在打开，请稍候', 'warn'); return; }
+    startRun(S.tool === 'convert' ? 'convert' : S.tool);
   }
 
   /* 打开文件期间页面仍显示上一份文档，此时的操作会被载入结果覆盖，直接拒绝 */
@@ -385,6 +411,7 @@
     S.redMarks = [];
     S.hist = ZJPages.createHistory(40);
     pushHistory();
+    markDirty(false);
     syncOutputNames(doc);
     addRecent(doc);
     switchView('workspace');
@@ -427,19 +454,28 @@
     return rot % 180 !== 0 ? { w: base.h, h: base.w } : { w: base.w, h: base.h };
   }
 
+  var thumbObserver = null;
+  var paintQueue = [];
+  var painting = false;
+
   function buildThumbs() {
     var list = $('#thumbList');
-    if (!S.doc) { list.innerHTML = ''; return; }
-    var LIMIT = 80;
+    if (!S.doc) {
+      list.innerHTML = '';
+      if (thumbObserver) { thumbObserver.disconnect(); thumbObserver = null; }
+      return;
+    }
     var html = '';
     S.pages.forEach(function (p, i) {
-      if (i >= LIMIT) return;
       var sel = S.sel.indexOf(i) > -1;
+      var dims = pageSize(p);
+      var w = 96;
+      var h = Math.max(24, Math.round(w * dims.h / dims.w));
       html += '<div class="thumb' + (sel ? ' is-selected' : '') + '" data-idx="' + i + '" draggable="true" ' +
         'role="option" aria-selected="' + sel + '" tabindex="0" aria-label="第 ' + (i + 1) + ' 页">' +
         '<button class="thumb-pick" tabindex="-1" aria-label="选择第 ' + (i + 1) + ' 页">' + icon('check', 10) + '</button>' +
         '<div class="thumb-figure' + (p.blank ? ' is-blank' : '') + '">' +
-          '<canvas data-thumb="' + i + '"></canvas>' +
+          '<canvas data-thumb="' + i + '" style="width:' + w + 'px;height:' + h + 'px"></canvas>' +
           '<span class="thumb-badge">' + (i + 1) + '</span>' +
           (p.rot ? '<span class="thumb-rot">' + p.rot + '°</span>' : '') +
           '<div class="thumb-tools">' +
@@ -450,40 +486,73 @@
         '</div>' +
       '</div>';
     });
-    if (S.pages.length > LIMIT) {
-      html += '<div class="field-hint" style="text-align:center;padding:8px 4px">仅显示前 ' + LIMIT + ' 页缩略图</div>';
-    }
     list.innerHTML = html;
-    paintThumbs();
+    paintQueue = [];
+    painting = false;
+    watchThumbs();
   }
 
-  function paintThumbs() {
-    if (!S.doc) return;
-    var canvases = $$('[data-thumb]', $('#thumbList'));
-    var i = 0;
-    function next() {
-      if (i >= canvases.length) return;
-      var cv = canvases[i++];
-      var idx = parseInt(cv.dataset.thumb, 10);
-      var page = S.pages[idx];
-      if (!page) { next(); return; }
-      var w = 96;
-      if (page.blank) {
-        var blankDims = pageSize(page);
-        var h = Math.round(w * blankDims.h / blankDims.w);
-        cv.width = Math.round(w * 2); cv.height = Math.round(h * 2);
-        cv.style.width = w + 'px'; cv.style.height = h + 'px';
-        var c = cv.getContext('2d');
-        c.fillStyle = '#fff'; c.fillRect(0, 0, cv.width, cv.height);
-        next(); return;
-      }
-      ZJRender.render(S.doc, page.index, cv, w, Math.min(2, window.devicePixelRatio || 1))
-        .then(function () {
-          applyRot(cv, page.rot, w, w * 1.414);
-          next();
-        }).catch(function () { next(); });
+  /* 只为可视区域的缩略图绘制位图，离开视野后释放画布内存；DOM 节点始终保留，拖动排序对全部页面有效 */
+  function watchThumbs() {
+    var list = $('#thumbList');
+    if (thumbObserver) { thumbObserver.disconnect(); thumbObserver = null; }
+    if (typeof window.IntersectionObserver !== 'function') { paintAllThumbs(); return; }
+    thumbObserver = new window.IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var cv = entry.target.querySelector('canvas[data-thumb]');
+        if (!cv) return;
+        if (entry.isIntersecting) scheduleThumb(cv);
+        else releaseThumb(cv);
+      });
+    }, { root: list, rootMargin: '320px 0px' });
+    $$('.thumb', list).forEach(function (el) { thumbObserver.observe(el); });
+  }
+
+  function paintAllThumbs() {
+    $$('[data-thumb]', $('#thumbList')).forEach(function (cv) { scheduleThumb(cv); });
+  }
+
+  function scheduleThumb(cv) {
+    if (cv.dataset.painted === '1' || cv.dataset.queued === '1') return;
+    cv.dataset.queued = '1';
+    paintQueue.push(cv);
+    if (!painting) nextThumb();
+  }
+
+  function releaseThumb(cv) {
+    if (cv.dataset.painted !== '1') return;
+    cv.width = 0;
+    cv.height = 0;
+    cv.removeAttribute('data-painted');
+    cv.style.transform = '';
+  }
+
+  function nextThumb() {
+    var cv = paintQueue.shift();
+    if (!cv) { painting = false; return; }
+    painting = true;
+    var idx = parseInt(cv.dataset.thumb, 10);
+    var page = S.pages[idx];
+    if (!page) { delete cv.dataset.queued; nextThumb(); return; }
+    var w = 96;
+    var finish = function () {
+      cv.dataset.painted = '1';
+      delete cv.dataset.queued;
+      nextThumb();
+    };
+    if (page.blank) {
+      var blankDims = pageSize(page);
+      var h = Math.round(w * blankDims.h / blankDims.w);
+      cv.width = Math.round(w * 2); cv.height = Math.round(h * 2);
+      cv.style.width = w + 'px'; cv.style.height = h + 'px';
+      var c = cv.getContext('2d');
+      c.fillStyle = '#fff'; c.fillRect(0, 0, cv.width, cv.height);
+      finish();
+      return;
     }
-    next();
+    ZJRender.render(S.doc, page.index, cv, w, Math.min(2, window.devicePixelRatio || 1))
+      .then(function () { applyRot(cv, page.rot, w, w * 1.414); finish(); })
+      .catch(function () { delete cv.dataset.queued; nextThumb(); });
   }
 
   function applyRot(cv, rot, w, h) {
@@ -625,6 +694,7 @@
   function pushHistory() {
     S.hist.push(S.pages);
     updateUndoRedo();
+    markDirty(true);
   }
   function restore(snap) {
     if (!snap) return;
@@ -664,6 +734,36 @@
     if (!S.doc) { showToast('先打开一个 PDF', 'warn'); return; }
     var list = typeof idx === 'number' ? [idx] : targets();
     if (!list.length || S.pages[list[0]] === undefined) return;
+
+    if (act === 'up' || act === 'down' || act === 'move') {
+      if (list.length !== 1) { showToast('请只选择一页再移动', 'warn'); return; }
+      var from = list[0];
+      var target = -1;
+      if (act === 'up') target = from - 1;
+      else if (act === 'down') target = from + 1;
+      else {
+        var input = $('#moveToPage');
+        var want = parseInt(input ? input.value : '', 10);
+        if (!Number.isInteger(want) || want < 1 || want > S.pages.length) {
+          showToast('请输入 1–' + S.pages.length + ' 之间的页码', 'warn');
+          if (input) input.focus();
+          return;
+        }
+        target = want - 1;
+      }
+      if (target < 0 || target >= S.pages.length) {
+        showToast(act === 'up' ? '已经是第一页' : '已经是最后一页', 'info');
+        return;
+      }
+      if (target === from) { showToast('页面位置没有变化', 'info'); return; }
+      var insertAt = target > from ? target + 1 : target;
+      S.pages = ZJPages.move(S.pages, from, insertAt);
+      S.sel = [target];
+      S.current = target;
+      pushHistory(); buildThumbs(); renderMain(); updateSel(); updateNav();
+      showToast('已移动页面到第 ' + (target + 1) + ' 位', 'ok');
+      return;
+    }
 
     if (act === 'rotate-r' || act === 'rot') {
       S.pages = ZJPages.rotate(S.pages, list, 90);
@@ -726,6 +826,7 @@
           '<div class="fi-meta">' + f.pages + ' 页 · ' + kb(f.size) + (f.demo ? ' · 示例预览，不能导出' : '') + '</div></div>' +
         '<span class="fi-actions">' +
           '<button class="icon-btn" data-mfup="' + i + '" aria-label="上移">' + icon('chevron-up') + '</button>' +
+          '<button class="icon-btn" data-mfdown="' + i + '" aria-label="下移">' + icon('chevron-down') + '</button>' +
           '<button class="icon-btn" data-mfdel="' + i + '" aria-label="移除">' + icon('x') + '</button>' +
         '</span>' +
       '</div>';
@@ -1162,6 +1263,7 @@
         outputUrls.convert = URL.createObjectURL(result.blob);
         setPanelState('convert', 'done', { name: saved.name, path: saved.location, note: result.note, outputUrl: outputUrls.convert });
         setStatus('ready', '本机处理完成 · 已保存');
+        markDirty(false);
         showToast('已生成并保存：' + saved.name, 'ok');
       });
     }).catch(function (err) {
@@ -1405,6 +1507,7 @@
               : '拆分输出已打包为 ZIP；解压后可见各个 PDF。';
           setPanelState(tool, 'done', { name: saved.name, path: saved.location, note: note, outputUrl: outputUrls[tool] });
           setStatus('ready', '本机处理完成 · 已保存');
+          markDirty(false);
           showToast('已生成并保存：' + saved.name, 'ok');
         });
       }).catch(function (err) {
@@ -1880,6 +1983,18 @@
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickFiles(); }
     });
     window.addEventListener('dragover', function (e) { e.preventDefault(); });
+    /* 浏览器模式下用 beforeunload 兜底；桌面版由主进程弹确认框 */
+    if (!(window.zjDesktop && window.zjDesktop.isDesktop)) {
+      window.addEventListener('beforeunload', function (e) {
+        if (!dirty) return;
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      });
+    } else if (typeof window.zjDesktop.onSaveRequest === 'function') {
+      window.zjDesktop.onSaveRequest(function () { requestSave(); });
+    }
+
     window.addEventListener('drop', function (e) {
       e.preventDefault();
       if (e.target.closest('#stageViewport') && e.dataTransfer.files.length) onFilesPicked(e.dataTransfer.files);
@@ -2004,8 +2119,18 @@
         if (e.shiftKey) redo(); else undo();
         return;
       }
+      if (e.key === 'Escape' && S.loading) {
+        loadCancelled = true;
+        showToast('正在取消读取…', 'info');
+        return;
+      }
       if (e.key === 'Escape') { closeDevPop(); }
       if (S.view !== 'workspace') return;
+      if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && S.tool === 'organize' && S.doc) {
+        e.preventDefault();
+        pageAct(e.key === 'ArrowUp' ? 'up' : 'down');
+        return;
+      }
       if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); goPage(S.current + 1); }
       if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goPage(S.current - 1); }
       if (e.key === '+' || e.key === '=') { setZoom(S.zoom + 0.1); }
@@ -2223,8 +2348,10 @@
     $('#mergeFiles').addEventListener('click', function (e) {
       var del = e.target.closest('[data-mfdel]');
       var up = e.target.closest('[data-mfup]');
+      var down = e.target.closest('[data-mfdown]');
       if (del) {
         S.mergeFiles.splice(parseInt(del.dataset.mfdel, 10), 1);
+        markDirty(true);
         renderMergeList(); renderMergePreview();
       }
       if (up) {
@@ -2233,6 +2360,17 @@
           var tmp = S.mergeFiles[i - 1];
           S.mergeFiles[i - 1] = S.mergeFiles[i];
           S.mergeFiles[i] = tmp;
+          markDirty(true);
+          renderMergeList(); renderMergePreview();
+        }
+      }
+      if (down) {
+        var d = parseInt(down.dataset.mfdown, 10);
+        if (d > -1 && d < S.mergeFiles.length - 1) {
+          var tmp2 = S.mergeFiles[d + 1];
+          S.mergeFiles[d + 1] = S.mergeFiles[d];
+          S.mergeFiles[d] = tmp2;
+          markDirty(true);
           renderMergeList(); renderMergePreview();
         }
       }
@@ -2267,6 +2405,7 @@
       var item = S.mergeFiles.splice(mDrag, 1)[0];
       S.mergeFiles.splice(insertAt, 0, item);
       mDrag = null;
+      markDirty(true);
       renderMergeList(); renderMergePreview();
     });
 

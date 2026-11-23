@@ -505,7 +505,21 @@
                         删除
                       </button>
                     </div>
-                    <p class="field-hint">删除页面会先从视图移除，保存前可随时撤销。</p>
+                    <div class="row-2">
+                      <button class="btn btn-secondary btn-sm" data-pageact="up" aria-label="把选中的页向上移动一位">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chevron-up"/></svg>
+                        上移
+                      </button>
+                      <button class="btn btn-secondary btn-sm" data-pageact="down" aria-label="把选中的页向下移动一位">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chevron-down"/></svg>
+                        下移
+                      </button>
+                    </div>
+                    <div class="row-inline">
+                      <input class="input" id="moveToPage" type="number" min="1" step="1" inputmode="numeric" placeholder="目标页码" style="flex:1" aria-label="目标页码">
+                      <button class="btn btn-secondary btn-sm" data-pageact="move" aria-label="把选中的页移动到指定位置">移到</button>
+                    </div>
+                    <p class="field-hint">也可以拖动缩略图排序，或用 Alt+↑ / Alt+↓ 上下移动。删除页面会先从视图移除，保存前可随时撤销。</p>
                   </div>
 
                   <div class="group">
@@ -565,6 +579,7 @@
                       <span class="chip chip-neutral" id="mergeCountChip">3 个文件</span>
                     </div>
                     <div class="file-list" id="mergeFiles"></div>
+                    <p class="field-hint" id="mergeOrderHint">拖动或点“上移 / 下移”调整顺序。合并顺序不支持撤销，导出前请确认。</p>
                     <button class="btn btn-secondary btn-sm btn-block" id="btnMergeAdd">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg>
                       添加文件
