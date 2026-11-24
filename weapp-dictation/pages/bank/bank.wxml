@@ -1,0 +1,136 @@
+<app-header role="{{role}}" students="{{students}}" activeId="{{activeChildId}}" />
+
+<view class="page">
+  <view class="page-head">
+    <text class="eyebrow">WORD COLLECTION / 温故知新</text>
+    <text class="h1">{{role === 'student' ? '这些单词，我们再练一练' : '错词库'}}</text>
+    <text class="desc">{{role === 'student' ? '记不牢很正常。听一听、想一想，每次练习都算数。' : '听写写错的词都在这里。下一次听写正确后，会自动移出。'}}</text>
+  </view>
+
+  <view class="notice">
+    {{role === 'student' ? '这里是家长听写中需要再练的词。自主练习会留下记录，下一次家长听写写对后再移出错词库。' : '与学生视图共用同一份错词记录，按孩子分别保存。'}}
+  </view>
+
+  <view class="draft-banner" wx:if="{{draft}}">
+    <view class="grow">
+      <text class="draft-title">有一份未完成的听写</text>
+      <text class="draft-sub">已批改 {{draft.graded}}/{{draft.total}} 个 · {{draft.modeText}}</text>
+    </view>
+    <button class="btn btn-sm btn-soft" bindtap="onResumeDraft">继续</button>
+  </view>
+
+  <block wx:if="{{list.length}}">
+    <view class="split">
+      <view class="card">
+        <view class="bank-top">
+          <view class="check-label" bindtap="onSelectAll">
+            <view class="check {{allSelected ? 'on' : ''}}">{{allSelected ? '✓' : ''}}</view>
+            <text>全选 {{list.length}} 个词</text>
+          </view>
+          <text class="mini-label">{{childName}}的错词</text>
+        </view>
+
+        <view class="bank-list">
+          <view
+            wx:for="{{list}}"
+            wx:key="id"
+            class="bank-line"
+            data-id="{{item.id}}"
+            bindtap="onToggle"
+          >
+            <view class="check {{item.selected ? 'on' : ''}}">{{item.selected ? '✓' : ''}}</view>
+            <view class="grow">
+              <view class="word-line">
+                <text class="word-name">{{item.en}}</text>
+                <text class="ipa-inline">{{item.ipa}}</text>
+              </view>
+              <text class="meaning">{{item.zh}}</text>
+              <text class="bank-details">Unit {{item.unit}} · 听写错过 {{item.count}} 次{{item.practiceCount ? ' · 已自主练习 ' + item.practiceCount + ' 次' : ''}}</text>
+            </view>
+            <text class="tag amber">待复习</text>
+            <sound-button word="{{item.word}}" language="en" />
+          </view>
+        </view>
+      </view>
+
+      <view class="side">
+        <view class="card">
+          <view class="card-pad">
+            <text class="card-title">{{role === 'student' ? '给记忆一点时间' : '再检查一次'}}</text>
+            <view class="count">
+              <text class="count-num">{{selectedCount}}</text>
+              <text class="count-unit">个已选错词</text>
+            </view>
+
+            <block wx:if="{{role === 'parent'}}">
+              <view class="divider"></view>
+              <text class="field-label">听写模式</text>
+              <view class="radio-card {{mode === 'manual' ? 'on' : ''}}" data-mode="manual" bindtap="onMode">
+                <view class="radio-dot"></view>
+                <view class="grow">
+                  <text class="radio-title">手动听写</text>
+                  <text class="radio-sub">逐词播放、逐词批改</text>
+                </view>
+              </view>
+              <view class="radio-card {{mode === 'auto' ? 'on' : ''}}" data-mode="auto" bindtap="onMode">
+                <view class="radio-dot"></view>
+                <view class="grow">
+                  <text class="radio-title">自动听写</text>
+                  <text class="radio-sub">连续播报，播完集中批改</text>
+                </view>
+              </view>
+
+              <view class="divider"></view>
+              <text class="field-label">播报方式</text>
+              <view class="radio-card {{language === 'zh' ? 'on' : ''}}" data-lang="zh" bindtap="onLanguage">
+                <view class="radio-dot"></view>
+                <view class="grow">
+                  <text class="radio-title">念中文，写英文</text>
+                </view>
+              </view>
+              <view class="radio-card {{language === 'en' ? 'on' : ''}}" data-lang="en" bindtap="onLanguage">
+                <view class="radio-dot"></view>
+                <view class="grow">
+                  <text class="radio-title">念英文，写英文</text>
+                </view>
+              </view>
+
+              <button class="btn btn-block start-btn" disabled="{{!selectedCount}}" bindtap="onStartDictation">听写所选错词</button>
+              <text class="helper">错词写对后移出，历史听写记录保留。</text>
+            </block>
+
+            <block wx:else>
+              <button class="btn btn-block start-btn" disabled="{{!selectedCount}}" bindtap="onStartPractice">练习所选错词</button>
+              <text class="helper">先根据词义回忆拼写，再核对答案。练习不会替代家长听写批改。</text>
+            </block>
+          </view>
+        </view>
+
+        <view class="tip">
+          <text class="tip-title">记住一次，还要再见几次</text>
+          <text class="tip-body">移出错词库的词，后续仍可参加日常复习；单次听写通过不代表长期掌握。</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view class="card" wx:else>
+    <empty-state
+      mark="✦"
+      title="这份错词库暂时是空的"
+      desc="{{role === 'student' ? '等家长完成听写批改，需要复习的词就会出现在这里。' : '可以从教材选一些词，陪孩子开始一次听写。'}}"
+      action="{{role === 'student' ? '回到今日复习' : '去教材选词'}}"
+      bind:action="onEmptyAction"
+    />
+  </view>
+</view>
+
+<tab-bar role="{{role}}" current="bank" />
+
+<app-modal
+  visible="{{modal}}"
+  title="{{modalTitle}}"
+  desc="{{modalDesc}}"
+  actions="{{modalActions}}"
+  bind:action="onModalAction"
+/>

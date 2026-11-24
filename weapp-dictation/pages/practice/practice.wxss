@@ -1,0 +1,96 @@
+.practice-page {
+  max-width: 700px;
+}
+
+.practice-card {
+  padding: 20px 16px 22px;
+}
+
+.practice-label {
+  display: block;
+  text-align: center;
+  font-size: 11px;
+  color: #8d9a90;
+  letter-spacing: 1px;
+  margin: 22px 0 6px;
+}
+
+.practice-question {
+  display: block;
+  text-align: center;
+  font-size: 26px;
+  font-weight: 650;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.practice-hint {
+  display: block;
+  text-align: center;
+  font-size: 11px;
+  color: #8e9d8d;
+  min-height: 20px;
+  letter-spacing: 1px;
+}
+
+.answer-input {
+  width: 100%;
+  border: 1px solid #d5dfd1;
+  border-radius: 12px;
+  padding: 15px;
+  font-size: 21px;
+  letter-spacing: 1px;
+  margin: 20px 0 10px;
+  background: #fcfdfa;
+  color: #243b34;
+}
+
+.practice-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.feedback {
+  border: 1px solid #d9e7d2;
+  background: #f2f8ee;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 16px;
+}
+
+.feedback.wrong {
+  background: #fff7ef;
+  border-color: #efdbc8;
+}
+
+.feedback-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 650;
+  margin-bottom: 8px;
+}
+
+.feedback-word {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.example {
+  display: block;
+  font-size: 12px;
+  color: #4f6657;
+  margin-top: 8px;
+  line-height: 1.7;
+}
+
+.next-btn {
+  margin-top: 16px;
+}
+
+.center {
+  text-align: center;
+  display: block;
+}

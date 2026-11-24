@@ -1,0 +1,1 @@
+<view class="sound {{playing ? 'on' : ''}}" catchtap="onTap">{{label}}</view>

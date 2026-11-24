@@ -1,0 +1,163 @@
+.bank-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e4eae4;
+  gap: 10px;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #576e60;
+}
+
+.bank-list {
+  padding: 0 16px;
+}
+
+.bank-line {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 15px 0;
+  border-bottom: 1px solid #eef2ec;
+}
+
+.bank-line:last-child {
+  border-bottom: none;
+}
+
+.word-line {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.ipa-inline {
+  font-size: 10px;
+  color: #9ba69e;
+  font-family: Arial, sans-serif;
+}
+
+.bank-details {
+  display: block;
+  font-size: 10px;
+  color: #9ba59b;
+  margin-top: 5px;
+}
+
+.count {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 14px 0 4px;
+}
+
+.count-num {
+  font-size: 40px;
+  font-weight: 550;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.count-unit {
+  font-size: 12px;
+  color: #78867f;
+}
+
+.radio-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e4eae4;
+  border-radius: 10px;
+  padding: 11px;
+  margin-bottom: 8px;
+  background: #fff;
+}
+
+.radio-card.on {
+  background: #f2f7f0;
+  border-color: #a4bea3;
+}
+
+.radio-dot {
+  width: 15px;
+  height: 15px;
+  border: 1px solid #cbd6c7;
+  border-radius: 50%;
+  flex: none;
+  background: #fff;
+}
+
+.radio-card.on .radio-dot {
+  border: 4px solid #235f4d;
+}
+
+.radio-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.radio-sub {
+  display: block;
+  font-size: 10px;
+  color: #78867f;
+  margin-top: 2px;
+}
+
+.start-btn {
+  margin-top: 6px;
+}
+
+.draft-banner {
+  background: #fff6e8;
+  border: 1px solid #efdfc4;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.draft-title {
+  display: block;
+  font-size: 12px;
+  color: #927448;
+  font-weight: 600;
+}
+
+.draft-sub {
+  display: block;
+  font-size: 10px;
+  color: #a98d63;
+  margin-top: 3px;
+}
+
+.tip {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f0f3eb;
+  margin-top: 12px;
+}
+
+.tip-title {
+  display: block;
+  color: #60744e;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.tip-body {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #839076;
+}

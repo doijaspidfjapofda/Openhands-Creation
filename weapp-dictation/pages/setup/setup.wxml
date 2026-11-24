@@ -1,0 +1,200 @@
+<app-header role="{{role}}" students="{{students}}" activeId="{{activeChildId}}" />
+
+<view class="page">
+  <view class="page-head">
+    <text class="eyebrow">DICTATION / 一起听写</text>
+    <text class="h1">给今天的单词，一次小检查</text>
+    <text class="desc">选好要听写的单词，孩子在纸上写，你来标记对错。</text>
+  </view>
+
+  <view class="draft-banner" wx:if="{{draft}}">
+    <view class="grow">
+      <text class="draft-title">有一份未完成的听写</text>
+      <text class="draft-sub">已批改 {{draft.graded}}/{{draft.total}} 个 · {{draft.modeText}}</text>
+    </view>
+    <view class="draft-actions">
+      <button class="btn btn-sm btn-soft" bindtap="onResume">继续</button>
+      <button class="btn btn-sm btn-ghost" bindtap="onAskDiscard">放弃</button>
+    </view>
+  </view>
+
+  <view class="intro">
+    <view class="grow">
+      <text class="intro-title">听写不赶时间，记住才是目的。</text>
+      <text class="intro-sub">错了的词先留下，下一次写对了再移出错词库。</text>
+      <view class="steps">
+        <text class="step"><text class="step-no">1</text> 选择单词</text>
+        <text class="dash">—</text>
+        <text class="step"><text class="step-no">2</text> 播报与批改</text>
+        <text class="dash">—</text>
+        <text class="step"><text class="step-no">3</text> 错词再练习</text>
+      </view>
+    </view>
+    <view class="book">
+      <text class="book-a">Aa</text>
+      <text class="book-t">WORD BOOK</text>
+    </view>
+  </view>
+
+  <view class="split">
+    <view class="card">
+      <view class="card-pad">
+        <view class="card-title-row">
+          <text class="card-title">选择本次听写单词</text>
+          <text class="small">支持跨单元勾选</text>
+        </view>
+
+        <view class="book-meta">
+          <view class="book-icon">▤</view>
+          <view class="grow">
+            <text class="meta-title">{{version}}版 · {{grade}}{{term}}</text>
+            <text class="meta-sub">演示词表，正式教材内容待录入</text>
+          </view>
+        </view>
+
+        <view class="filters">
+          <picker range="{{gradeOptions}}" value="{{gradeIndex}}" bindchange="onGrade">
+            <view class="select">{{grade}} ⌄</view>
+          </picker>
+          <picker range="{{termOptions}}" value="{{termIndex}}" bindchange="onTerm">
+            <view class="select">{{term}} ⌄</view>
+          </picker>
+          <picker range="{{versionOptions}}" value="{{versionIndex}}" bindchange="onVersion">
+            <view class="select">{{version}}版 ⌄</view>
+          </picker>
+        </view>
+
+        <scroll-view class="unit-scroll" scroll-x="{{true}}">
+          <view class="units">
+            <view
+              wx:for="{{unitOptions}}"
+              wx:key="value"
+              class="unit {{unit === item.value ? 'on' : ''}}"
+              data-value="{{item.value}}"
+              bindtap="onUnit"
+            >{{item.label}}</view>
+          </view>
+        </scroll-view>
+
+        <view class="search">
+          <text class="search-icon">⌕</text>
+          <input
+            class="search-input"
+            placeholder="搜索英文单词或中文释义"
+            value="{{query}}"
+            bindinput="onSearch"
+          />
+        </view>
+
+        <view class="toolbar">
+          <view class="check-label" bindtap="onSelectAll">
+            <view class="check {{allSelected ? 'on' : ''}}">{{allSelected ? '✓' : ''}}</view>
+            <text>全选当前列表</text>
+          </view>
+          <text class="toolbar-count">{{list.length}} 个词 · <text class="link" bindtap="onClear">清空已选</text></text>
+        </view>
+
+        <view class="word-list">
+          <view
+            wx:for="{{list}}"
+            wx:key="id"
+            class="word-row {{item.selected ? 'on' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="onToggleWord"
+          >
+            <view class="check {{item.selected ? 'on' : ''}}">{{item.selected ? '✓' : ''}}</view>
+            <view class="grow">
+              <view class="word-line">
+                <text class="word-name">{{item.en}}</text>
+                <text class="ipa-inline">{{item.ipa}}</text>
+              </view>
+              <text class="meaning">{{item.zh}}</text>
+            </view>
+            <text wx:if="{{item.isWrong}}" class="tag amber">待复习</text>
+            <sound-button word="{{item.word}}" language="en" />
+          </view>
+
+          <empty-state
+            wx:if="{{!list.length}}"
+            mark="⌕"
+            title="没有找到这个单词"
+            desc="试试其他关键词，或切换单元。"
+          />
+        </view>
+      </view>
+    </view>
+
+    <view class="side">
+      <view class="card">
+        <view class="card-pad">
+          <text class="card-title">本次听写安排</text>
+          <view class="count">
+            <text class="count-num">{{selectedCount}}</text>
+            <text class="count-unit">个已选单词</text>
+          </view>
+          <text class="helper">可以少一点，慢慢学扎实。</text>
+
+          <view class="divider"></view>
+          <text class="field-label">听写模式</text>
+          <view class="radio-card {{mode === 'manual' ? 'on' : ''}}" data-mode="manual" bindtap="onMode">
+            <view class="radio-dot"></view>
+            <view class="grow">
+              <text class="radio-title">手动听写</text>
+              <text class="radio-sub">逐词播放、逐词批改</text>
+            </view>
+          </view>
+          <view class="radio-card {{mode === 'auto' ? 'on' : ''}}" data-mode="auto" bindtap="onMode">
+            <view class="radio-dot"></view>
+            <view class="grow">
+              <text class="radio-title">自动听写</text>
+              <text class="radio-sub">连续播报，播完集中批改</text>
+            </view>
+          </view>
+
+          <view class="divider"></view>
+          <text class="field-label">播报方式</text>
+          <view class="radio-card {{language === 'zh' ? 'on' : ''}}" data-lang="zh" bindtap="onLanguage">
+            <view class="radio-dot"></view>
+            <view class="grow">
+              <text class="radio-title">念中文，写英文</text>
+              <text class="radio-sub">练习词义回忆和拼写</text>
+            </view>
+          </view>
+          <view class="radio-card {{language === 'en' ? 'on' : ''}}" data-lang="en" bindtap="onLanguage">
+            <view class="radio-dot"></view>
+            <view class="grow">
+              <text class="radio-title">念英文，写英文</text>
+              <text class="radio-sub">练习听音识词和拼写</text>
+            </view>
+          </view>
+
+          <view class="divider"></view>
+          <text class="field-label">出词顺序</text>
+          <picker range="{{orderOptions}}" value="{{orderIndex}}" bindchange="onOrder">
+            <view class="select select-block">{{orderOptions[orderIndex]}} ⌄</view>
+          </picker>
+
+          <button class="btn btn-block start-btn" disabled="{{!selectedCount}}" bindtap="onStart">开始听写</button>
+          <text class="helper">没有倒计时。语音当前为演示占位，接入说明见 README。</text>
+        </view>
+      </view>
+
+      <view class="tip">
+        <text class="tip-title">给家长的小提示</text>
+        <text class="tip-body">先让孩子独立写完，再查看答案。未批改的单词不会被默认为正确。</text>
+      </view>
+    </view>
+  </view>
+
+  <text class="foot-note">本地交互原型 · 演示词表与数据，不代表正式教材内容</text>
+</view>
+
+<tab-bar role="{{role}}" current="setup" />
+
+<app-modal
+  visible="{{modal}}"
+  title="{{modalTitle}}"
+  desc="{{modalDesc}}"
+  actions="{{modalActions}}"
+  bind:action="onModalAction"
+/>

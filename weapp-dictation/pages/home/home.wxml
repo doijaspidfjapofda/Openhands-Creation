@@ -1,0 +1,57 @@
+<app-header role="{{role}}" students="{{students}}" activeId="{{activeChildId}}" />
+
+<view class="page">
+  <view class="page-head">
+    <text class="eyebrow">A LITTLE EVERY DAY</text>
+    <text class="h1">你好，{{childName}}。今天也学一点。</text>
+    <text class="desc">从上次听写的错词开始，慢慢把不熟悉变成会用。</text>
+  </view>
+
+  <view class="student-banner">
+    <view class="grow">
+      <text class="banner-eyebrow">YOUR WORDS, YOUR PACE</text>
+      <text class="banner-title">{{wrongCount ? '有 ' + wrongCount + ' 个单词，等你再见一面。' : '今天的错词库，干干净净。'}}</text>
+      <text class="banner-sub">{{wrongCount ? '不用一口气全记住。先回忆，再核对，给记忆一点时间。' : '可以请家长从教材选词听写，找到下一次练习的起点。'}}</text>
+      <button class="btn btn-sm banner-btn" bindtap="onMainAction">{{wrongCount ? '开始错词复习' : '查看我的错词'}}</button>
+    </view>
+    <view class="leaf">Aa</view>
+  </view>
+
+  <view class="metrics">
+    <view class="metric">
+      <text class="metric-label">我的待复习词</text>
+      <text class="num">{{wrongCount}}</text>
+      <text class="sub">来自家长听写</text>
+    </view>
+    <view class="metric green">
+      <text class="metric-label">自主练习次数</text>
+      <text class="num">{{practiceCount}}</text>
+      <text class="sub">每次练习都有记录</text>
+    </view>
+    <view class="metric">
+      <text class="metric-label">累计练过</text>
+      <text class="num">{{totalWords}}</text>
+      <text class="sub">词次，含重复练习</text>
+    </view>
+  </view>
+
+  <view class="student-grid">
+    <view class="card card-pad">
+      <text class="card-title">我的错词</text>
+      <text class="card-sub">家长刚批改的结果，也会更新到这里。</text>
+      <view class="tags">
+        <text class="tag gray" wx:for="{{tags}}" wx:key="*this">{{item}}</text>
+        <text class="tag gray" wx:if="{{!tags.length}}">暂时没有错词</text>
+      </view>
+      <text class="text-btn" bindtap="onGoBank">查看全部 ›</text>
+    </view>
+
+    <view class="card card-pad">
+      <text class="card-title">试试这样记</text>
+      <text class="card-sub">先遮住英文，自己想一想。想不起来时，再看一点提示。核对后读一遍，下次再见面。</text>
+      <text class="tag gray tip-tag">自主练习不会直接移出听写错词</text>
+    </view>
+  </view>
+</view>
+
+<tab-bar role="{{role}}" current="home" />

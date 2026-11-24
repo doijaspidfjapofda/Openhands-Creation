@@ -1,0 +1,42 @@
+<view class="header">
+  <view class="inner">
+    <view class="brand" bindtap="onBrand">
+      <view class="brand-mark">词</view>
+      <view class="brand-text">
+        <text class="brand-name">词间</text>
+        <text class="brand-en">LITTLE STEPS, BIG WORDS</text>
+      </view>
+    </view>
+
+    <view class="right">
+      <view class="seg">
+        <view class="seg-item {{role === 'parent' ? 'on' : ''}}" data-role="parent" bindtap="onRole">家长</view>
+        <view class="seg-item {{role === 'student' ? 'on' : ''}}" data-role="student" bindtap="onRole">学生</view>
+      </view>
+
+      <picker mode="selector" range="{{studentNames}}" value="{{childIndex}}" bindchange="onChild">
+        <view class="who">
+          <text class="avatar">{{childInitial}}</text>
+          <text class="who-name">{{childName}}</text>
+          <text class="chev">⌄</text>
+        </view>
+      </picker>
+
+      <view class="icon-btn" bindtap="onAdd">+</view>
+      <view class="icon-btn" bindtap="onMore">⋯</view>
+    </view>
+  </view>
+</view>
+
+<app-modal
+  visible="{{modal}}"
+  title="{{modalTitle}}"
+  desc="{{modalDesc}}"
+  actions="{{modalActions}}"
+  input="{{modalInput}}"
+  inputValue="{{newName}}"
+  placeholder="例如：小雨"
+  error="{{error}}"
+  bind:action="onModalAction"
+  bind:input="onModalInput"
+/>

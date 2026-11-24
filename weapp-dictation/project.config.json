@@ -1,0 +1,22 @@
+{
+  "description": "词间 · 教材词汇听写与错词复习（微信小程序交互原型）",
+  "appid": "touristappid",
+  "projectname": "wordnest-dictation-prototype",
+  "compileType": "miniprogram",
+  "libVersion": "3.5.5",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": false,
+    "coverView": true,
+    "showShadowRootInWxmlPanel": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "useCompilerPlugins": false,
+    "ignoreUploadUnusedFiles": true
+  },
+  "condition": {}
+}
