@@ -1,0 +1,85 @@
+<app-header role="{{role}}" students="{{students}}" activeId="{{activeChildId}}" />
+
+<view class="page">
+  <view class="crumbs" wx:if="{{!missing}}">
+    <text class="back" bindtap="onBack">‹ 返回</text>
+    <text>/</text>
+    <text>{{childName}} 的听写结果</text>
+  </view>
+
+  <block wx:if="{{missing}}">
+    <view class="card">
+      <empty-state
+        mark="⌕"
+        title="找不到这份记录"
+        desc="记录可能属于另一个学生档案，或演示数据已被重置。"
+        action="回到听写记录"
+        bind:action="onHistory"
+      />
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="hero">
+      <view class="hero-icon">✓</view>
+      <text class="hero-title">这次听写，完成啦。</text>
+      <text class="hero-sub">{{childName}} · {{dateText}}</text>
+      <text class="hero-sub">{{sourceText}} · {{modeText}}{{sample ? ' · 演示记录' : ''}}</text>
+      <text class="hero-sub">写对的值得肯定，写错的留给下一次。</text>
+    </view>
+
+    <view class="metrics">
+      <view class="metric">
+        <text class="metric-label">本次已批改</text>
+        <text class="num">{{graded}}</text>
+        <text class="sub">{{pending ? '计划 ' + planned + ' 个，未批改的不计入' : '个单词'}}</text>
+      </view>
+      <view class="metric green">
+        <text class="metric-label">正确</text>
+        <text class="num">{{correct}}</text>
+        <text class="sub">正确率 {{accuracy}}%</text>
+      </view>
+      <view class="metric amber">
+        <text class="metric-label">需要再练</text>
+        <text class="num">{{wrong}}</text>
+        <text class="sub">已更新到错词库</text>
+      </view>
+    </view>
+
+    <view class="notice" wx:if="{{pending}}">
+      本次计划 {{planned}} 个词，实际批改 {{graded}} 个。未批改的 {{pending}} 个词不计入正确率，也不会改变错词库。
+    </view>
+
+    <view class="notice">
+      本次新增 {{added}} 个错词，移出 {{removed}} 个错词。当前错词库共 {{wrongTotal}} 个词。历史记录会保留，移出错词库不会删除历史。
+    </view>
+
+    <view class="card">
+      <view class="card-pad">
+        <view class="card-title-row">
+          <text class="card-title">逐词记录</text>
+          <text class="small">按最终标记统计</text>
+        </view>
+        <view class="res-row" wx:for="{{items}}" wx:key="id">
+          <view class="grow">
+            <view class="word-line">
+              <text class="word-name">{{item.en}}</text>
+              <text class="ipa-inline">{{item.ipa}}</text>
+            </view>
+            <text class="meaning">{{item.zh}}</text>
+          </view>
+          <text class="tag {{item.ok ? '' : 'amber'}}">{{item.ok ? '写对了' : '需要再练'}}</text>
+        </view>
+        <empty-state wx:if="{{!items.length}}" mark="✦" title="没有已批改的词" desc="本次没有保存任何批改结果。" />
+      </view>
+    </view>
+
+    <view class="actions">
+      <button class="btn btn-block" bindtap="onStudentBank">切到学生视图查看错词</button>
+      <button class="btn btn-secondary btn-block" bindtap="onGoBank">从错词库再次听写</button>
+      <button class="btn btn-ghost btn-block" bindtap="onNewSetup">开始新的听写</button>
+    </view>
+  </block>
+</view>
+
+<tab-bar role="{{role}}" current="setup" />

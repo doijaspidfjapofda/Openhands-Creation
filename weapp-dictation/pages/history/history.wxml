@@ -1,0 +1,46 @@
+<app-header role="{{role}}" students="{{students}}" activeId="{{activeChildId}}" />
+
+<view class="page">
+  <view class="page-head">
+    <text class="eyebrow">DICTATION HISTORY</text>
+    <text class="h1">每一次练习，都有迹可循</text>
+    <text class="desc">听写历史会一直保留，移出错词库不会抹掉过去的记录。</text>
+  </view>
+
+  <view class="top-action">
+    <button class="btn btn-sm btn-secondary" bindtap="onNew">新的听写</button>
+  </view>
+
+  <view class="card" wx:if="{{list.length}}">
+    <view
+      wx:for="{{list}}"
+      wx:key="id"
+      class="history-item"
+      data-id="{{item.id}}"
+      bindtap="onOpen"
+    >
+      <view class="history-icon">✎</view>
+      <view class="grow">
+        <text class="history-title">{{item.title}}</text>
+        <text class="history-sub">{{item.dateText}}{{item.sample ? ' · 演示记录' : ''}}{{item.pending ? ' · 未批改 ' + item.pending + ' 个' : ''}}</text>
+      </view>
+      <view class="history-count">
+        <text>{{item.graded}} 个词</text>
+        <text class="history-sub">正确 {{item.correct}} · 错误 {{item.wrong}}</text>
+      </view>
+      <text class="chev">›</text>
+    </view>
+  </view>
+
+  <view class="card" wx:else>
+    <empty-state
+      mark="◷"
+      title="还没有听写记录"
+      desc="完成一次听写并保存后，结果会出现在这里。"
+      action="开始第一次听写"
+      bind:action="onNew"
+    />
+  </view>
+</view>
+
+<tab-bar role="{{role}}" current="history" />

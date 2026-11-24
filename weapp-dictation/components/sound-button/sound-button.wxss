@@ -1,0 +1,18 @@
+.sound {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f1f6ef;
+  color: #76917d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex: none;
+  transition: background 0.15s;
+}
+
+.sound.on {
+  background: #235f4d;
+  color: #fff;
+}

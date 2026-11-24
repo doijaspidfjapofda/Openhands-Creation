@@ -1,0 +1,33 @@
+{
+  "pages": [
+    "pages/setup/setup",
+    "pages/session/session",
+    "pages/result/result",
+    "pages/bank/bank",
+    "pages/history/history",
+    "pages/home/home",
+    "pages/practice/practice",
+    "pages/practice-result/practice-result",
+    "pages/practice-history/practice-history"
+  ],
+  "window": {
+    "backgroundColor": "#f7f8f5",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": false,
+    "navigationBarTitleText": "词间",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black"
+  },
+  "usingComponents": {
+    "app-header": "/components/app-header/app-header",
+    "tab-bar": "/components/tab-bar/tab-bar",
+    "app-modal": "/components/app-modal/app-modal",
+    "sound-button": "/components/sound-button/sound-button",
+    "empty-state": "/components/empty-state/empty-state"
+  },
+  "resizable": true,
+  "pageOrientation": "auto",
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

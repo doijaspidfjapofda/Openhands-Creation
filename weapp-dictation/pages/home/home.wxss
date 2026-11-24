@@ -1,0 +1,85 @@
+.student-banner {
+  background: #eaf1df;
+  border: 1px solid #dae5cc;
+  border-radius: 17px;
+  padding: 22px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.banner-eyebrow {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  color: #8a9a7d;
+  margin-bottom: 6px;
+}
+
+.banner-title {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.banner-sub {
+  display: block;
+  font-size: 11px;
+  color: #7e8c6d;
+  line-height: 1.8;
+  margin-bottom: 14px;
+}
+
+.banner-btn {
+  width: auto;
+  display: inline-flex;
+  background: #235f4d;
+  color: #fff;
+}
+
+.leaf {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 56px;
+  color: #7e9d63;
+  line-height: 1;
+  padding: 6px;
+  flex: none;
+}
+
+.student-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-sub {
+  display: block;
+  font-size: 12px;
+  color: #8b9785;
+  line-height: 1.9;
+  margin-top: 8px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 14px 0;
+}
+
+.tip-tag {
+  margin-top: 14px;
+}
+
+@media (min-width: 700px) {
+  .student-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}

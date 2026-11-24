@@ -1,0 +1,28 @@
+.empty {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.mark {
+  display: block;
+  font-size: 30px;
+  color: #a8b9a2;
+  margin-bottom: 6px;
+}
+
+.title {
+  display: block;
+  font-size: 16px;
+  color: #50694e;
+  font-weight: 650;
+  margin-bottom: 8px;
+}
+
+.desc {
+  display: block;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #89968c;
+  max-width: 320px;
+  margin: 0 auto 16px;
+}

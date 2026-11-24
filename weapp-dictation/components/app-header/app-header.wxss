@@ -1,0 +1,156 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid #e4eae4;
+}
+
+.inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: #235f4d;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  flex: none;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.brand-name {
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: 3px;
+  line-height: 1.2;
+}
+
+.brand-en {
+  font-size: 8px;
+  color: #78867f;
+  letter-spacing: 1.4px;
+  white-space: nowrap;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.seg {
+  display: flex;
+  border: 1px solid #e4eae4;
+  background: #f7f9f6;
+  border-radius: 9px;
+  padding: 3px;
+}
+
+.seg-item {
+  padding: 5px 9px;
+  font-size: 11px;
+  border-radius: 6px;
+  color: #718078;
+  white-space: nowrap;
+}
+
+.seg-item.on {
+  background: #235f4d;
+  color: #fff;
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  border-radius: 9px;
+  background: #f7f9f6;
+  border: 1px solid #e4eae4;
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f0e5cf;
+  color: #78613a;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.who-name {
+  font-size: 11px;
+  color: #243b34;
+  max-width: 56px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chev {
+  font-size: 10px;
+  color: #9aa59e;
+}
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid #e4eae4;
+  color: #78867c;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  flex: none;
+}
+
+@media (max-width: 380px) {
+  .brand-en {
+    display: none;
+  }
+
+  .brand-name {
+    font-size: 17px;
+    letter-spacing: 2px;
+  }
+
+  .who-name {
+    display: none;
+  }
+
+  .seg-item {
+    padding: 5px 7px;
+  }
+}

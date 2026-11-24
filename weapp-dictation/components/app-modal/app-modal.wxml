@@ -1,0 +1,25 @@
+<view class="mask" wx:if="{{visible}}" bindtap="onMask">
+  <view class="dialog" catchtap="noop">
+    <text class="d-title">{{title}}</text>
+    <text class="d-desc" wx:if="{{desc}}">{{desc}}</text>
+    <input
+      wx:if="{{input}}"
+      class="d-input"
+      value="{{inputValue}}"
+      placeholder="{{placeholder}}"
+      maxlength="12"
+      confirm-type="done"
+      bindinput="onInput"
+    />
+    <text class="d-error" wx:if="{{error}}">{{error}}</text>
+    <view class="d-actions">
+      <button
+        wx:for="{{actions}}"
+        wx:key="key"
+        class="d-btn {{item.type}}"
+        data-key="{{item.key}}"
+        bindtap="onAction"
+      >{{item.label}}</button>
+    </view>
+  </view>
+</view>

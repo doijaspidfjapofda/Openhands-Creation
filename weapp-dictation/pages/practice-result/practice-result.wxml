@@ -1,0 +1,68 @@
+<app-header role="{{role}}" students="{{students}}" activeId="{{activeChildId}}" />
+
+<view class="page">
+  <block wx:if="{{missing}}">
+    <view class="card">
+      <empty-state
+        mark="⌕"
+        title="找不到这次练习"
+        desc="记录可能属于另一个学生档案，或演示数据已被重置。"
+        action="回到今日复习"
+        bind:action="onHome"
+      />
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="hero">
+      <view class="hero-icon">✦</view>
+      <text class="hero-title">又和这些单词熟悉了一点。</text>
+      <text class="hero-sub">{{childName}} · {{dateText}}</text>
+      <text class="hero-sub">这次练了 {{total}} 个词，练习记录已保存。</text>
+    </view>
+
+    <view class="metrics">
+      <view class="metric green">
+        <text class="metric-label">独立写对</text>
+        <text class="num">{{independent}}</text>
+        <text class="sub">没有使用提示</text>
+      </view>
+      <view class="metric">
+        <text class="metric-label">提示后写对</text>
+        <text class="num">{{hinted}}</text>
+        <text class="sub">下次试试自己回忆</text>
+      </view>
+      <view class="metric amber">
+        <text class="metric-label">还需巩固</text>
+        <text class="num">{{weak}}</text>
+        <text class="sub">之后再多练一次</text>
+      </view>
+    </view>
+
+    <view class="notice">错词库保持原样，等待下次家长听写检验。这次练习通过，也不代表永久记住。</view>
+
+    <view class="card">
+      <view class="card-pad">
+        <view class="card-title-row">
+          <text class="card-title">逐词记录</text>
+          <text class="small">区分独立与提示</text>
+        </view>
+        <view class="res-row" wx:for="{{items}}" wx:key="id">
+          <view class="grow">
+            <text class="word-name">{{item.en}}</text>
+            <text class="res-answer">你写的是：{{item.answer}}</text>
+          </view>
+          <text class="tag {{item.correct ? '' : 'amber'}}">{{item.label}}</text>
+        </view>
+        <empty-state wx:if="{{!items.length}}" mark="✦" title="没有作答记录" desc="这次练习没有保存任何作答。" />
+      </view>
+    </view>
+
+    <view class="actions">
+      <button class="btn btn-block" bindtap="onHome">回到今日复习</button>
+      <button class="btn btn-secondary btn-block" bindtap="onBank">查看我的错词</button>
+    </view>
+  </block>
+</view>
+
+<tab-bar role="{{role}}" current="practice-history" />

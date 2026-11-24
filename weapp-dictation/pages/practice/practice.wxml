@@ -1,0 +1,58 @@
+<app-header role="{{role}}" students="{{students}}" activeId="{{activeChildId}}" lockSwitch="{{true}}" />
+
+<view class="page practice-page">
+  <view class="crumbs">
+    <text class="back" bindtap="onExit">‹ 暂停练习</text>
+    <text class="spacer"></text>
+    <text>{{index + 1}} / {{total}}</text>
+  </view>
+
+  <view class="card practice-card">
+    <view class="progress">
+      <view class="progress-fill" style="width:{{progressPct}}%"></view>
+    </view>
+
+    <text class="practice-label">看词义，回忆英文拼写</text>
+    <text class="practice-question">{{word.zh}}</text>
+    <text class="practice-hint">{{hintText ? '首字母提示：' + hintText : '先自己想一想，想不起来也没关系'}}</text>
+
+    <input
+      class="answer-input"
+      value="{{answer}}"
+      placeholder="写下你想起的英文单词"
+      confirm-type="done"
+      focus="{{focus}}"
+      disabled="{{feedback}}"
+      bindinput="onInput"
+      bindconfirm="onSubmit"
+    />
+
+    <view class="practice-actions" wx:if="{{!feedback}}">
+      <text class="text-btn" bindtap="onHint">{{usedHint ? '已使用提示' : '◎ 给我一点提示'}}</text>
+      <button class="btn btn-sm" bindtap="onSubmit">检查答案</button>
+    </view>
+
+    <view class="feedback {{feedback.correct ? '' : 'wrong'}}" wx:if="{{feedback}}">
+      <text class="feedback-title">{{feedback.title}}</text>
+      <view class="feedback-word">
+        <text class="word-name">{{word.en}}</text>
+        <sound-button word="{{word}}" language="en" />
+      </view>
+      <text class="ipa">{{word.ipa}}</text>
+      <text class="example">{{word.example}}</text>
+      <text class="meaning">{{word.translation}}</text>
+    </view>
+
+    <button class="btn btn-block next-btn" wx:if="{{feedback}}" bindtap="onNext">{{index >= total - 1 ? '完成这次练习' : '继续下一个 ›'}}</button>
+
+    <text class="helper center">这里记录你的练习。下次家长听写写对后，才会移出错词库。</text>
+  </view>
+</view>
+
+<app-modal
+  visible="{{modal}}"
+  title="{{modalTitle}}"
+  desc="{{modalDesc}}"
+  actions="{{modalActions}}"
+  bind:action="onModalAction"
+/>
